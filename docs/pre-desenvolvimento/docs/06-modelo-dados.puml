@@ -1,0 +1,67 @@
+@startuml
+title Modelo de Dados — Proposta (alinhada ao plano de implementação)
+
+entity employee {
+  * id : integer <<PK>>
+  --
+  name : varchar(100)
+  email : varchar(150) <<UNIQUE>>
+  position_name : varchar(100)
+}
+
+entity leader_lead {
+  * leader_id : integer <<PK,FK>>
+  * lead_id : integer <<PK,FK>>
+  --
+  CHECK(leader_id <> lead_id)
+}
+
+entity evaluation_question {
+  * id : integer <<PK>>
+  --
+  title : varchar
+  weight : integer
+  order : integer
+}
+
+entity evaluation_summary {
+  * id : integer <<PK>>
+  --
+  employee_id : integer <<FK>>
+  evaluator_id : integer <<FK>>
+  total_score : float
+  evaluation_date : datetime
+  evaluation_year : integer
+  week_number : integer
+  --
+  UNIQUE(evaluator_id, employee_id, evaluation_year, week_number)
+}
+
+entity evaluation_response {
+  * id : integer <<PK>>
+  --
+  evaluation_summary_id : integer <<FK>>
+  question_id : integer <<FK>>
+  score : integer <<CHECK(1-4)>>
+  --
+  UNIQUE(evaluation_summary_id, question_id)
+}
+
+employee ||--o{ leader_lead : leader
+employee ||--o{ leader_lead : lead
+employee ||--o{ evaluation_summary : evaluator
+employee ||--o{ evaluation_summary : evaluated
+evaluation_question ||--o{ evaluation_response : question
+evaluation_summary ||--o{ evaluation_response : contains
+
+note bottom of evaluation_summary
+  Cada linha representa uma avaliação enviada.
+  Não há drafts; `is_submitted` não existe.
+  Sem UPDATE/DELETE após envio.
+end note
+
+note bottom of evaluation_response
+  Respostas são inteiras de 1 a 4.
+  Pesos estão na tabela evaluation_question.
+end note
+@enduml
