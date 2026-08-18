@@ -1,0 +1,62 @@
+Contexto: 
+Você precisa construir uma plataforma web que permita ao usuário avaliar seus liderados. 
+O usuário deve ser capaz de: 
+● Avaliar todos os funcionários que fazem parte da sua hierarquia. 
+Outras informações: 
+● As respostas das questões serão preenchidas como inteiros de 1 a 4 e possuirão pesos. 
+● Após o envio das respostas elas não poderão ser alteradas, sendo permitida uma avaliação por semana para cada par líder-funcionário. 
+● Os líderes podem avaliar seus liderados diretos e os liderados dos seus subordinados, mesmo que seu subordinado já tenha avaliado o seu próprio liderado dentro do período. 
+● Deve ser vedado ao usuário ver a sua própria avaliação, a dos seus pares ou superiores, sendo visível apenas as dos seus subordinados (sendo eles diretos ou indiretos). 
+● NÃO é necessário implementar um sistema de login completo, mas é necessário documentar uma maneira de identificar qual liderança está realizando as avaliações, com uma maneira simples de trocar entre diferentes líderes. Recomenda-se a utilização de cookies ou local storage para tal. 
+Origem dos dados: 
+Os dados relacionados aos funcionários devem ser armazenados em banco local de suas escolha que melhor se adeque a tarefa, abaixo segue um dump SQL que pode ser usado ou tomado como base: 
+Dump Employee
+ 
+As respostas das avaliações devem ser também armazenadas em banco local, o esquema da tabela de respostas é de sua escolha. 
+As perguntas e seus pesos são como segue abaixo:
+Questão 
+Peso
+Entrega de Resultados 
+25
+Execução e Qualidade do Trabalho 
+20
+Capacidade de Aprendizado e Desenvolvimento 
+20
+Resolução de Problemas e Pensamento Crítico 
+15
+Colaboração, Influência e Liderança 
+10
+Visão Estratégica e Potencial de Crescimento 
+10
+Requisitos Funcionais: 
+Avaliações: o que esperamos exibir (exemplos) 
+● Identificador do avaliado 
+● Sua avaliação mais recente 
+● Seu histórico de avaliações (opcional) 
+● As respostas cadastradas quando o funcionário já tenha sido avaliado (respeitando sempre a maior hierarquia) 
+Requisitos Técnicos (Obrigatórios) 
+O candidato deve demonstrar senioridade na escolha da arquitetura dentro da stack 
+definida: 
+● Tecnologias esperadas: 
+○ Front: 
+■ HTML, CSS e TypeScript com framework moderno (react, vue, etc) e bibliotecas que facilitem o desenvolvimento. 
+○ Back: 
+■ Linguagem: Python 3.10+ OU Golang 1.23+ OU PHP 8.0+. 
+■ Frameworks e libs que facilitem o desenvolvimento. 
+○ Infraestrutura 
+■ Docker: preferencialmente com todos os serviços 
+conteinerizados e na mesma rede (opcional). 
+● Dados &amp; Engenharia: 
+○ Queries SQL eficientes e seguras (parametrizadas para evitar injection, se aplicável). 
+Entregáveis 
+1. Link do repositório público no GitHub. 
+2. Documentação do projeto (código e endpoints) 
+3. Um README.md contendo: 
+○ Instruções claras de setup 
+i. como instalar dependências 
+ii. execução passo a passo 
+iii. onde colocar as chaves, se necessário 
+○ Um diagrama simples ou explicação da arquitetura e fluxo 
+Entregáveis adicionais 
+Não são obrigatórios mas serão bem-vindos documentos pré-desenvolvimento (histórias de usuário, diagramas UML, protótipos, etc)
+.

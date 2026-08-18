@@ -1,0 +1,19 @@
+@startuml
+title Sequência — Autorização Hierárquica
+actor Lider as L
+participant Frontend as FE
+participant API
+participant SQLite as DB
+L -> FE: solicita avaliações
+FE -> API: GET /evaluations
+API -> DB: CTE recursiva: subordinados (UNION)
+DB --> API: IDs permitidos
+API -> DB: busca avaliações dos IDs (evaluation_summary)
+DB --> API: dados
+API --> FE: resultado filtrado
+FE --> L: exibe somente subordinados
+note over API,DB
+A autorização ocorre no backend.
+O filtro do frontend não é mecanismo de segurança.
+end note
+@enduml

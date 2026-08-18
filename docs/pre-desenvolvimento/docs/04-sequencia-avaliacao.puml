@@ -1,0 +1,27 @@
+@startuml
+title Sequência — Envio de Avaliação
+actor Lider as L
+participant Frontend as FE
+participant API
+database SQLite as DB
+L -> FE: Seleciona subordinado
+FE -> API: GET avaliação
+API -> DB: valida hierarquia (CTE recursiva)
+DB --> API: autorizado
+API -> DB: busca avaliação recente (evaluation_summary)
+DB --> API: dados
+API --> FE: dados
+L -> FE: preenche 6 respostas (1..4)
+FE -> API: POST /evaluations
+API -> DB: valida hierarquia e semana (evaluation_year, week_number)
+alt já existe
+ DB --> API: conflito (UNIQUE constraint)
+ API --> FE: 409
+else não existe
+ DB --> API: OK
+ API -> API: calcula resultado ponderado
+ API -> DB: INSERT evaluation_summary + evaluation_response
+ DB --> API: commit
+ API --> FE: 201
+end
+@enduml

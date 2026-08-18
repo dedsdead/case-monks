@@ -1,0 +1,9 @@
+{
+  "folders": [
+    { "name": "Workspace", "path": "." },
+    { "name": "Frontend", "path": "./repos/frontend" },
+    { "name": "Backend", "path": "./repos/backend" },
+    { "name": "Docs", "path": "./docs" }
+  ],
+  "settings": {}
+}

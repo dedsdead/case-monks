@@ -1,0 +1,28 @@
+@startuml
+left to right direction
+title Casos de Uso — Plataforma de Avaliações
+actor "Líder" as L
+rectangle "Plataforma" {
+ usecase "Selecionar liderança" as U1
+ usecase "Visualizar subordinados" as U2
+ usecase "Consultar avaliação" as U3
+ usecase "Consultar histórico" as U4
+ usecase "Preencher avaliação" as U5
+ usecase "Enviar avaliação" as U6
+ usecase "Validar hierarquia" as U7
+ usecase "Validar limite semanal" as U8
+ usecase "Calcular resultado" as U9
+}
+L --> U1
+L --> U2
+L --> U3
+L --> U4
+L --> U5
+L --> U6
+U3 ..> U7 : <<include>>
+U4 ..> U7 : <<include>>
+U5 ..> U7 : <<include>>
+U6 ..> U7 : <<include>>
+U6 ..> U8 : <<include>>
+U6 ..> U9 : <<include>>
+@enduml
