@@ -134,7 +134,14 @@ alembic downgrade -1
 
 ### Seed Data
 
-```bash
-# Import dump SQL
-sqlite3 data/casetecnico.db < seed.sql
+Seed data is loaded automatically via the Python seed service on backend startup.
+
+```python
+# app/services/seed.py
+def seed_database(db: Session) -> None:
+    # Idempotent: checks if data exists before inserting
+    # Inserts 20 employees, 19 leader_lead relationships, 6 evaluation questions
+    pass
 ```
+
+The seed function runs during FastAPI lifespan startup and is idempotent (skips if data already exists).
