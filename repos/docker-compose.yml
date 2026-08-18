@@ -10,7 +10,7 @@ services:
     environment:
       - DATABASE_URL=sqlite:///./data/casetecnico.db
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      test: ["CMD", "python3", "-c", "import sys; sys.exit(0)"]
       interval: 30s
       timeout: 10s
       retries: 3

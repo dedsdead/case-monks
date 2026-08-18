@@ -1,9 +1,13 @@
 """Seed data service for initial database population."""
 
+import logging
+
 from sqlalchemy.orm import Session
 
 from app.models.employee import Employee, LeaderLead
 from app.models.evaluation_question import EvaluationQuestion
+
+logger = logging.getLogger(__name__)
 
 
 def seed_database(db: Session) -> None:
@@ -14,6 +18,7 @@ def seed_database(db: Session) -> None:
     """
     # Check and insert employees
     if db.query(Employee).first() is None:
+        logger.info("Seeding employees...")
         employees = [
             Employee(id=1, name="Alice Hartman", email="alice.hartman@company.com", position_name="CEO"),
             Employee(id=2, name="Bob Sinclair", email="bob.sinclair@company.com", position_name="CTO"),
@@ -38,9 +43,11 @@ def seed_database(db: Session) -> None:
         ]
         db.add_all(employees)
         db.flush()
+        logger.info("Seeded 20 employees")
 
     # Check and insert leader_lead relationships
     if db.query(LeaderLead).first() is None:
+        logger.info("Seeding leader_lead relationships...")
         relationships = [
             LeaderLead(leader_id=1, lead_id=2),   # Alice → Bob
             LeaderLead(leader_id=1, lead_id=3),   # Alice → Carol
@@ -64,9 +71,11 @@ def seed_database(db: Session) -> None:
         ]
         db.add_all(relationships)
         db.flush()
+        logger.info("Seeded 19 leader_lead relationships")
 
     # Check and insert evaluation questions
     if db.query(EvaluationQuestion).first() is None:
+        logger.info("Seeding evaluation questions...")
         questions = [
             EvaluationQuestion(id=1, title="Entrega de Resultados", weight=25, order=1),
             EvaluationQuestion(id=2, title="Trabalho em Equipe", weight=20, order=2),
@@ -76,5 +85,7 @@ def seed_database(db: Session) -> None:
             EvaluationQuestion(id=6, title="Liderança e Influência", weight=10, order=6),
         ]
         db.add_all(questions)
+        logger.info("Seeded 6 evaluation questions")
 
     db.commit()
+    logger.info("Seed commit completed")
