@@ -617,54 +617,54 @@ All UI components must use these colors consistently via CSS custom properties:
 
 ### Phase 2: Database Layer
 
-**Status**: ⬜ Pending
+**Status**: ✅ Completed
 **Objective**: Define all SQLAlchemy models, create Alembic migration, seed data
 **Dependencies**: Phase 1
 
 **Tasks**:
 
-- [ ] T014 Create `repos/backend/app/models/employee.py`
+- [x] T014 Create `repos/backend/app/models/employee.py`
   - `class Employee(Base)`: `__tablename__ = "employee"`, columns: `id: Mapped[int] = mapped_column(primary_key=True)`, `name: Mapped[str] = mapped_column(String(100))`, `email: Mapped[str] = mapped_column(String(150), unique=True)`, `position_name: Mapped[str] = mapped_column(String(100))`
   - `class LeaderLead(Base)`: `__tablename__ = "leader_lead"`, columns: `leader_id: Mapped[int] = mapped_column(ForeignKey("employee.id"), primary_key=True)`, `lead_id: Mapped[int] = mapped_column(ForeignKey("employee.id"), primary_key=True)`
   - Table args: `CheckConstraint("leader_id <> lead_id", name="chk_no_self_lead")`, `Index("ix_leader_lead_reverse", "lead_id")`
 
-- [ ] T015 [P] Create `repos/backend/app/models/evaluation_question.py`
+- [x] T015 [P] Create `repos/backend/app/models/evaluation_question.py`
   - `class EvaluationQuestion(Base)`: `__tablename__ = "evaluation_question"`
   - Columns: `id: Mapped[int] (PK)`, `title: Mapped[str]`, `weight: Mapped[int]`, `order: Mapped[int]`
 
-- [ ] T016 [P] Create `repos/backend/app/models/evaluation_summary.py`
+- [x] T016 [P] Create `repos/backend/app/models/evaluation_summary.py`
   - `class EvaluationSummary(Base)`: `__tablename__ = "evaluation_summary"`
   - Columns: `id: Mapped[int] (PK)`, `employee_id: Mapped[int] (FK employee.id)`, `evaluator_id: Mapped[int] (FK employee.id)`, `total_score: Mapped[float]`, `evaluation_date: Mapped[datetime]`, `evaluation_year: Mapped[int]`, `week_number: Mapped[int]`
   - Table args: `UniqueConstraint("evaluator_id", "employee_id", "evaluation_year", "week_number", name="uq_evaluator_employee_week")`, `Index("ix_eval_summary_employee_evaluator", "employee_id", "evaluator_id")`, `Index("ix_eval_summary_latest", "employee_id", "evaluator_id", "evaluation_date")`
   - Note: No `is_submitted` column — every row represents a submitted evaluation
 
-- [ ] T017 [P] Create `repos/backend/app/models/evaluation_response.py`
+- [x] T017 [P] Create `repos/backend/app/models/evaluation_response.py`
   - `class EvaluationResponse(Base)`: `__tablename__ = "evaluation_response"`
   - Columns: `id: Mapped[int] (PK)`, `evaluation_summary_id: Mapped[int] (FK evaluation_summary.id)`, `question_id: Mapped[int] (FK evaluation_question.id)`, `score: Mapped[int]`
   - Table args: `UniqueConstraint("evaluation_summary_id", "question_id", name="uq_eval_response_summary_question")`, `Index("ix_eval_response_question", "question_id")`
   - UNIQUE constraint prevents duplicate responses per question per evaluation
 
-- [ ] T018 [P] Update `repos/backend/app/models/__init__.py`
+- [x] T018 [P] Update `repos/backend/app/models/__init__.py`
   - Import all models: `Employee`, `LeaderLead`, `EvaluationQuestion`, `EvaluationSummary`, `EvaluationResponse`
   - Export `Base` for Alembic
 
-- [ ] T019 Initialize Alembic in `repos/backend/`
+- [x] T019 Initialize Alembic in `repos/backend/`
   - Run `alembic init alembic`
   - Configure `alembic.ini`: `sqlalchemy.url = sqlite:///./data/casetecnico.db`
   - Configure `alembic/env.py`: import `Base.metadata` for autogenerate target
   - Set `render_as_batch=True` in Alembic config (required for SQLite)
 
-- [ ] T020 Generate initial Alembic migration
+- [x] T020 Generate initial Alembic migration
   - Run `alembic revision --autogenerate -m "initial schema"`
   - Verify generated migration creates: employee, leader_lead, evaluation_question, evaluation_response, evaluation_summary
   - Verify indexes and constraints are included
 
-- [ ] T021 Run migration locally IMMEDIATELY (atomic chain)
+- [x] T021 Run migration locally IMMEDIATELY (atomic chain)
   - Run `alembic upgrade head`
   - Verify tables exist in SQLite database
   - This prevents schema drift in subsequent migrations
 
-- [ ] T022 Create `repos/backend/app/services/seed.py`
+- [x] T022 Create `repos/backend/app/services/seed.py`
   - `def seed_database(db: Session) -> None`
   - Check if `employee` table already has data; return early if so (idempotent)
   - Insert 20 employees from SQL dump (adapted for SQLite: no `SERIAL`, no `setval`)
@@ -672,14 +672,14 @@ All UI components must use these colors consistently via CSS custom properties:
   - Insert 6 `evaluation_question` rows with titles, weights, and order from brainstorm
   - Use SQLAlchemy `insert()` with `prefixes=["OR IGNORE"]` or check-before-insert for idempotency
 
-- [ ] T023 [P] Create `repos/backend/app/utils/week.py`
+- [x] T023 [P] Create `repos/backend/app/utils/week.py`
   - `def get_current_iso_week() -> tuple[int, int]`: returns `(year, week_number)` using `datetime.now().isocalendar()`
   - `def get_week_number(dt: datetime) -> tuple[int, int]`: returns `(year, week_number)` for a given datetime
 
 **After completing this phase**:
-1. Run `alembic upgrade head` — verify database schema
-2. Run seed function — verify 20 employees + 19 relationships + 6 questions loaded
-3. Update this plan — mark Phase 2 as `✅ Completed`
+1. ✅ Run `alembic upgrade head` — verify database schema
+2. ✅ Run seed function — verify 20 employees + 19 relationships + 6 questions loaded
+3. ✅ Update this plan — mark Phase 2 as `✅ Completed`
 
 ---
 
