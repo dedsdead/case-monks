@@ -11,7 +11,7 @@ from app.models.evaluation_question import EvaluationQuestion
 from app.models.evaluation_response import EvaluationResponse
 from app.models.evaluation_summary import EvaluationSummary
 from app.schemas.evaluation import EvaluationCreate
-from app.services.hierarchy import clear_cache, get_all_subordinates, get_all_subordinates_with_depth
+from app.services.hierarchy import get_all_subordinates, get_all_subordinates_with_depth
 from app.utils.week import get_current_iso_week
 
 
@@ -27,56 +27,62 @@ def create_evaluation(
     if not is_ancestor_of(db, evaluator_id, data.employee_id):
         raise HierarchyViolation()
 
-    # Weekly limit check
+    # Weekly limit check - Use atomic transaction to prevent race conditions
     year, week = get_current_iso_week()
-    existing = (
-        db.query(EvaluationSummary)
-        .filter(
-            EvaluationSummary.evaluator_id == evaluator_id,
-            EvaluationSummary.employee_id == data.employee_id,
-            EvaluationSummary.evaluation_year == year,
-            EvaluationSummary.week_number == week,
-        )
-        .first()
-    )
-    if existing:
-        raise WeeklyLimitExceeded(existing.id)
+    
+    # Check for existing evaluation in an atomic transaction
+    try:
+        with db.begin():
+            existing = (
+                db.query(EvaluationSummary)
+                .filter(
+                    EvaluationSummary.evaluator_id == evaluator_id,
+                    EvaluationSummary.employee_id == data.employee_id,
+                    EvaluationSummary.evaluation_year == year,
+                    EvaluationSummary.week_number == week,
+                )
+                .with_for_update()  # Lock the row to prevent concurrent inserts
+                .first()
+            )
+            if existing:
+                raise WeeklyLimitExceeded(existing.id)
 
-    # Calculate total score
-    questions = db.execute(
-        select(EvaluationQuestion.id, EvaluationQuestion.weight)
-        .order_by(EvaluationQuestion.id)
-    ).all()
-    weight_map = {q.id: q.weight for q in questions}
+            # Calculate total score
+            questions = db.execute(
+                select(EvaluationQuestion.id, EvaluationQuestion.weight)
+                .order_by(EvaluationQuestion.id)
+            ).all()
+            weight_map = {q.id: q.weight for q in questions}
 
-    total_score = sum(
-        s.score * weight_map[s.question_id] for s in data.scores
-    ) / 100.0
+            total_score = sum(
+                s.score * weight_map[s.question_id] for s in data.scores
+            ) / 100.0
 
-    # Create summary
-    summary = EvaluationSummary(
-        employee_id=data.employee_id,
-        evaluator_id=evaluator_id,
-        total_score=round(total_score, 1),
-        evaluation_date=datetime.now(),
-        evaluation_year=year,
-        week_number=week,
-    )
-    db.add(summary)
-    db.flush()
+            # Create summary
+            summary = EvaluationSummary(
+                employee_id=data.employee_id,
+                evaluator_id=evaluator_id,
+                total_score=round(total_score, 1),
+                evaluation_date=datetime.now(),
+                evaluation_year=year,
+                week_number=week,
+            )
+            db.add(summary)
+            db.flush()
 
-    # Create responses
-    for s in data.scores:
-        response = EvaluationResponse(
-            evaluation_summary_id=summary.id,
-            question_id=s.question_id,
-            score=s.score,
-        )
-        db.add(response)
+            # Create responses
+            for s in data.scores:
+                response = EvaluationResponse(
+                    evaluation_summary_id=summary.id,
+                    question_id=s.question_id,
+                    score=s.score,
+                )
+                db.add(response)
+    except Exception as e:
+        db.rollback()
+        raise e
 
-    db.commit()
     db.refresh(summary)
-    clear_cache()
     return summary
 
 

@@ -1,25 +1,13 @@
-"""Hierarchy service with recursive CTE queries."""
+"""Hierarchy service with simple recursive CTE queries."""
 
-import time
-
-from sqlalchemy import select, union, literal, text
+from sqlalchemy import select, text
 from sqlalchemy.orm import Session
 
 from app.models.employee import LeaderLead
 
-# Module-level cache: {leader_id: (timestamp, [lead_id, ...])}
-_subordinate_cache: dict[int, tuple[float, list[int]]] = {}
-CACHE_TTL = 300  # 5 minutes
-
 
 def get_all_subordinates(db: Session, leader_id: int) -> list[int]:
     """Return all descendant lead_ids via recursive CTE using UNION (cycle-safe)."""
-    cached = _subordinate_cache.get(leader_id)
-    if cached:
-        ts, ids = cached
-        if time.time() - ts < CACHE_TTL:
-            return ids
-
     # Anchor: direct reports
     anchor = (
         select(LeaderLead.lead_id)
@@ -38,10 +26,7 @@ def get_all_subordinates(db: Session, leader_id: int) -> list[int]:
     cte = anchor.union(recursive)
 
     result = db.execute(select(cte.c.lead_id)).scalars().all()
-    ids = list(result)
-
-    _subordinate_cache[leader_id] = (time.time(), ids)
-    return ids
+    return list(result)
 
 
 def get_all_subordinates_with_depth(db: Session, leader_id: int) -> list[tuple[int, int]]:
@@ -70,8 +55,3 @@ def is_ancestor_of(db: Session, ancestor_id: int, descendant_id: int) -> bool:
     """Check if ancestor_id is an ancestor of descendant_id."""
     subordinates = get_all_subordinates(db, ancestor_id)
     return descendant_id in subordinates
-
-
-def clear_cache() -> None:
-    """Invalidate the subordinate cache (called after write operations)."""
-    _subordinate_cache.clear()
