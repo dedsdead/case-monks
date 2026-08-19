@@ -513,7 +513,7 @@ All UI components must use these colors consistently via CSS custom properties:
 | 2 | Database Layer | Phase 1 | ⬜ Pending |
 | 3 | Backend API | Phase 2 | ⬜ Pending |
 | 4 | Frontend Foundation | Phase 1, Phase 3 | ✅ Completed |
-| 5 | Frontend Features | Phase 4 | ⬜ Pending |
+| 5 | Frontend Features | Phase 4 | ✅ Completed |
 | 6 | Documentation & Polish | Phase 5 | ⬜ Pending |
 
 ---
@@ -859,13 +859,13 @@ All UI components must use these colors consistently via CSS custom properties:
 
 ### Phase 5: Frontend Features
 
-**Status**: ⬜ Pending
+**Status**: ✅ Completed
 **Objective**: Evaluation form, history view, error/loading states, responsive design
 **Dependencies**: Phase 4 (transitively depends on Phase 1 + Phase 3)
 
 **Tasks**:
 
-- [ ] T047 Create `repos/frontend/src/pages/Evaluate.tsx`
+- [x] T047 Create `repos/frontend/src/pages/Evaluate.tsx`
   - Read `employeeId` from URL params
   - Fetch employee details + questions on mount
   - Validate employee is in subordinate list (redirect if not)
@@ -874,7 +874,7 @@ All UI components must use these colors consistently via CSS custom properties:
   - Render `EvaluationForm` component
   - Show `LoadingSpinner` while loading
 
-- [ ] T048 [P] Create `repos/frontend/src/components/evaluation/EvaluationForm.tsx`
+- [x] T048 [P] Create `repos/frontend/src/components/evaluation/EvaluationForm.tsx`
   - Accept `employee: Employee`, `questions: Question[]` props
   - Local state: `scores: Record<number, number>` (question_id -> score)
   - For each question: display title, weight, numeric input (1-4)
@@ -886,29 +886,29 @@ All UI components must use these colors consistently via CSS custom properties:
   - On 409: show "Ja avaliou esta semana"
   - On 403: show access denied, navigate to `/`
 
-- [ ] T049 Create `repos/frontend/src/components/evaluation/ConfirmDialog.tsx`
+- [x] T049 Create `repos/frontend/src/components/evaluation/ConfirmDialog.tsx`
   - Accept `isOpen: boolean`, `onConfirm: () => void`, `onCancel: () => void`
   - Modal: "Confirmar envio da avaliacao? Esta acao nao pode ser desfeita."
   - Two buttons: "Confirmar" (`--color-primary` background) and "Cancelar" (`--color-border` background)
 
-- [ ] T050 [P] Create `repos/frontend/src/pages/History.tsx`
+- [x] T050 [P] Create `repos/frontend/src/pages/History.tsx`
   - Read `employeeId` from URL params
   - Fetch employee details + evaluation history on mount
   - Validate hierarchy (redirect if 403)
   - Render `EvaluationHistory` component
 
-- [ ] T051 Create `repos/frontend/src/components/history/EvaluationHistory.tsx`
+- [x] T051 Create `repos/frontend/src/components/history/EvaluationHistory.tsx`
   - Accept `history: EvaluationSummary[]`, `employeeName: string`
   - Table: Week, Year, Date, Total Score, expandable rows
   - Expandable row: `EvaluationDetail` component with per-question breakdown
   - Empty state: "Nenhuma avaliacao registrada para este funcionario"
 
-- [ ] T052 [P] Create `repos/frontend/src/components/history/EvaluationDetail.tsx`
+- [x] T052 [P] Create `repos/frontend/src/components/history/EvaluationDetail.tsx`
   - Accept `summary: EvaluationSummary` prop
   - Table: Question Title, Weight, Score, Weighted Contribution (score * weight / 100)
   - Total row at bottom
 
-- [ ] T053 Expand responsive CSS in `repos/frontend/src/index.css`
+- [x] T053 Expand responsive CSS in `repos/frontend/src/index.css`
   - CSS custom properties already defined in T008 — verify tokens are present
   - Add responsive breakpoints using the color palette tokens:
     - Mobile breakpoint: `< 768px` — stack columns, full-width buttons
@@ -917,7 +917,7 @@ All UI components must use these colors consistently via CSS custom properties:
   - Minimum touch targets: 44px height for buttons and inputs
   - Table horizontal scroll on mobile
 
-- [ ] T054 Create `repos/frontend/src/components/ui/Toast.tsx`
+- [x] T054 Create `repos/frontend/src/components/ui/Toast.tsx`
   - Simple toast notification component (no external library)
   - Props: `message: string`, `type: 'success' | 'error'`, `onClose: () => void`
   - Success: `--color-primary` background, `--color-background` text, auto-dismiss after 3s
@@ -1028,14 +1028,14 @@ All UI components must use these colors consistently via CSS custom properties:
 - [x] T046 Create NotFound page
 
 ### Phase 5: Frontend Features
-- [ ] T047 Create Evaluate page
-- [ ] T048 Create EvaluationForm component
-- [ ] T049 Create ConfirmDialog component
-- [ ] T050 Create History page
-- [ ] T051 Create EvaluationHistory component
-- [ ] T052 Create EvaluationDetail component
-- [ ] T053 Add responsive CSS
-- [ ] T054 Add toast notification system
+- [x] T047 Create Evaluate page
+- [x] T048 Create EvaluationForm component
+- [x] T049 Create ConfirmDialog component
+- [x] T050 Create History page
+- [x] T051 Create EvaluationHistory component
+- [x] T052 Create EvaluationDetail component
+- [x] T053 Add responsive CSS
+- [x] T054 Add toast notification system
 
 ### Phase 6: Documentation & Polish
 - [ ] T055 Create README.md
@@ -1103,3 +1103,33 @@ All UI components must use these colors consistently via CSS custom properties:
 - `repos/frontend/src/pages/Home.tsx` — Home page fetching subordinate evaluations
 - `repos/frontend/src/components/employee/EmployeeList.tsx` — Employee table with Avaliar/Histórico buttons
 - `repos/frontend/src/pages/NotFound.tsx` — 404 page with home link
+
+### 2026-08-19 — Phase 5: Frontend Features (T047–T054)
+
+**Scope:** Evaluate page (employee + questions fetch, error toasts, redirect on 403/404), EvaluationForm (6-question weighted form with real-time score preview, ConfirmDialog integration), ConfirmDialog (modal confirmation), History page (employee + history fetch, error handling), EvaluationHistory (expandable table with per-question breakdown), EvaluationDetail (weighted contribution table), Toast (portal-based notification with auto-dismiss), responsive CSS (breakpoints at 768px and 1024px), and full test suite (72 tests across 17 files).
+
+**Tasks completed (fully):** T047, T048, T049, T050, T051, T052, T053, T054
+**Tasks completed (partially):** None
+**Tasks not executed in this run:** None (all Phase 5 tasks completed)
+
+**Deviations:** None — all tasks implemented as planned.
+
+**Unplanned changes:**
+- ErrorBoundary converted from functional to class component (functional try/catch cannot catch render errors in children)
+- api.test.ts updated to match trailing slashes and `{ signal }` config object (API service evolved during implementation)
+- Evaluate page Toast rendering moved outside early return paths so 404/403 toasts always render
+
+**Test results:** 72 tests passing across 17 test files. Build succeeds.
+
+**Files changed:**
+- `repos/frontend/src/pages/Evaluate.tsx` — Evaluate page with AbortController, error toasts, redirect logic
+- `repos/frontend/src/pages/History.tsx` — History page with employee + evaluation history fetch
+- `repos/frontend/src/components/evaluation/EvaluationForm.tsx` — 6-question weighted form with real-time preview
+- `repos/frontend/src/components/evaluation/ConfirmDialog.tsx` — Modal confirmation dialog
+- `repos/frontend/src/components/history/EvaluationHistory.tsx` — Expandable evaluation table
+- `repos/frontend/src/components/history/EvaluationDetail.tsx` — Per-question breakdown table
+- `repos/frontend/src/components/ui/Toast.tsx` — Portal-based toast notification (success/error)
+- `repos/frontend/src/components/ui/ErrorBoundary.tsx` — Converted to class component for componentDidCatch
+- `repos/frontend/src/index.css` — Responsive breakpoints (768px, 1024px) and touch targets
+- `repos/frontend/src/App.tsx` — Updated with real Evaluate/History routes
+- Test files: Evaluate.test.tsx, History.test.tsx, EvaluationForm.test.tsx, ConfirmDialog.test.tsx, EvaluationHistory.test.tsx, EvaluationDetail.test.tsx, Toast.test.tsx, api.test.ts, Home.test.tsx, ErrorBoundary.test.tsx
