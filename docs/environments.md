@@ -61,6 +61,11 @@ uvicorn app.main:app --reload --port 8000
 cd frontend
 npm install
 npm run dev
+
+# Frontend tests
+cd frontend
+npm test              # Run all tests (watch mode)
+npm run test:run      # Run all tests (single run, CI mode)
 ```
 
 ### Docker Compose

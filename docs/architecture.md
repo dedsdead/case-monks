@@ -47,6 +47,8 @@ Plataforma web para avaliação de liderados seguindo hierarquia organizacional.
 | Frontend | React | 18.x | UI framework |
 | Frontend | TypeScript | 5.x | Type safety |
 | Frontend | Vite | 5.x | Build tool + dev server |
+| Frontend | Vitest | 3.x | Unit/integration testing |
+| Frontend | React Testing Library | 16.x | Component testing utilities |
 | Frontend | Axios | 1.x | HTTP client |
 | Backend | Python | 3.10+ | Runtime |
 | Backend | FastAPI | 0.110+ | Web framework |
@@ -90,25 +92,40 @@ backend/
 ```
 frontend/
 ├── src/
-│   ├── main.tsx             # App entrypoint
-│   ├── App.tsx              # Router setup
-│   ├── pages/               # Page components
-│   │   ├── Home.tsx
-│   │   ├── Evaluate.tsx
-│   │   └── History.tsx
-│   ├── components/          # Reusable components
-│   │   ├── LeaderSelector.tsx
-│   │   ├── EmployeeList.tsx
-│   │   ├── EvaluationForm.tsx
-│   │   └── EvaluationHistory.tsx
-│   ├── services/            # API calls
-│   │   └── api.ts
-│   ├── types/               # TypeScript types
-│   │   └── index.ts
-│   └── hooks/               # Custom hooks
-│       └── useAuth.ts
+│   ├── main.tsx                 # App entrypoint (wraps in AuthProvider + ErrorBoundary)
+│   ├── App.tsx                  # React Router setup
+│   ├── index.css                # CSS custom properties (color palette)
+│   ├── test-setup.ts            # Vitest global test setup (jsdom, testing-library)
+│   ├── pages/                   # Page components
+│   │   ├── Home.tsx             # Home page with subordinate evaluations
+│   │   ├── Evaluate.tsx         # Evaluation form page (Phase 5)
+│   │   ├── History.tsx          # Evaluation history page (Phase 5)
+│   │   └── NotFound.tsx         # 404 page with home link
+│   ├── components/
+│   │   ├── layout/              # App shell components
+│   │   │   ├── Layout.tsx       # App shell: header + Outlet
+│   │   │   └── LeaderSelector.tsx  # Identity selection dropdown
+│   │   ├── employee/            # Employee-related components
+│   │   │   └── EmployeeList.tsx # Subordinate table with action buttons
+│   │   ├── evaluation/          # Evaluation form components (Phase 5)
+│   │   │   ├── EvaluationForm.tsx
+│   │   │   └── ConfirmDialog.tsx
+│   │   ├── history/             # History components (Phase 5)
+│   │   │   ├── EvaluationHistory.tsx
+│   │   │   └── EvaluationDetail.tsx
+│   │   └── ui/                  # Shared UI primitives
+│   │       ├── LoadingSpinner.tsx
+│   │       ├── EmptyState.tsx
+│   │       └── ErrorBoundary.tsx
+│   ├── services/                # API calls
+│   │   └── api.ts               # Axios instance with cookie auth interceptor
+│   ├── types/                   # TypeScript types
+│   │   └── index.ts             # Interfaces matching backend schemas
+│   └── hooks/                   # Custom hooks
+│       └── useAuth.tsx          # Auth context (AuthProvider + useAuth)
 ├── package.json
-├── vite.config.ts
+├── vite.config.ts               # Vite config with /api proxy + Vitest config
+├── tsconfig.app.json            # TypeScript config (excludes test files)
 └── Dockerfile
 ```
 
@@ -118,7 +135,7 @@ frontend/
 
 ```
 1. Leader selects employee from dropdown
-2. Frontend sends GET /api/employees/subordinates
+2. Frontend sends GET /api/evaluations/subordinates
 3. Backend queries hierarchy using CTE
 4. Frontend displays list of subordinates
 5. Leader clicks "Evaluate" on employee

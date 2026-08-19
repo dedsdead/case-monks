@@ -512,7 +512,7 @@ All UI components must use these colors consistently via CSS custom properties:
 | 1 | Project Scaffolding & Schema Resolution | None | ⬜ Pending |
 | 2 | Database Layer | Phase 1 | ⬜ Pending |
 | 3 | Backend API | Phase 2 | ⬜ Pending |
-| 4 | Frontend Foundation | Phase 1, Phase 3 | ⬜ Pending |
+| 4 | Frontend Foundation | Phase 1, Phase 3 | ✅ Completed |
 | 5 | Frontend Features | Phase 4 | ⬜ Pending |
 | 6 | Documentation & Polish | Phase 5 | ⬜ Pending |
 
@@ -774,13 +774,13 @@ All UI components must use these colors consistently via CSS custom properties:
 
 ### Phase 4: Frontend Foundation
 
-**Status**: ⬜ Pending
+**Status**: ✅ Completed
 **Objective**: Set up auth, API services, types, routing, layout, home page
 **Dependencies**: Phase 1, Phase 3
 
 **Tasks**:
 
-- [ ] T035 Create `repos/frontend/src/types/index.ts`
+- [x] T035 Create `repos/frontend/src/types/index.ts`
   - `interface Employee { id: number; name: string; email: string; position_name: string; }`
   - `interface Question { id: number; title: string; weight: number; order: number; }`
   - `interface QuestionScore { question_id: number; title: string; weight: number; score: number; }`
@@ -789,30 +789,30 @@ All UI components must use these colors consistently via CSS custom properties:
   - `interface EvaluationSummary { id: number; employee_id: number; evaluator_id: number; total_score: number; evaluation_date: string; evaluation_year: number; week_number: number; questions: QuestionScore[]; }`
   - `interface SubordinateEvaluation { employee_id: number; employee_name: string; position_name: string; latest_evaluation: EvaluationSummary | null; depth: number; }`
 
-- [ ] T036 Create `repos/frontend/src/services/api.ts`
+- [x] T036 Create `repos/frontend/src/services/api.ts`
   - `const api = axios.create({ baseURL: '/api' })` (works with Vite proxy)
   - Interceptor: read `employee_id` from localStorage, set as `Cookie: employee_id=...` header on every request
   - Export methods: `getEmployees()`, `getEmployee(id)`, `getSubordinates(id)`, `getQuestions()`, `submitEvaluation(data)`, `getSubordinateEvaluations()`, `getEvaluationHistory(employeeId)`
 
-- [ ] T037 Create `repos/frontend/src/hooks/useAuth.ts`
+- [x] T037 Create `repos/frontend/src/hooks/useAuth.tsx`
   - `AuthContext` with `employeeId: number | null`, `setEmployeeId(id: number)`, `clearEmployee()`
   - Provider reads from `localStorage` on mount
   - `setEmployeeId` writes to `localStorage` and updates state
   - `clearEmployee` removes from `localStorage` and updates state
 
-- [ ] T038 Create `repos/frontend/src/components/layout/Layout.tsx`
+- [x] T038 Create `repos/frontend/src/components/layout/Layout.tsx`
   - App shell: header with LeaderSelector + main content area
   - Uses `useAuth` to get current employee
   - If no employee_id: render LeaderSelector full-page prompt
   - Otherwise: render header + `<Outlet />`
 
-- [ ] T039 [P] Create `repos/frontend/src/components/layout/LeaderSelector.tsx`
+- [x] T039 [P] Create `repos/frontend/src/components/layout/LeaderSelector.tsx`
   - Fetches all employees via `getEmployees()`
   - Dropdown with employee names — use `--color-border` border, `--color-background` background, `--color-primary` text
   - On select: call `setEmployeeId(id)`, page reloads/re-fetches
   - Shows "Selecione sua identidade" prompt when no identity selected — use `--color-primary` text, `--color-background` background
 
-- [ ] T040 Create `repos/frontend/src/App.tsx`
+- [x] T040 Create `repos/frontend/src/App.tsx`
   - `BrowserRouter` with routes:
     - `/` -> `Layout` -> `Home`
     - `/evaluate/:employeeId` -> `Layout` -> `Evaluate`
@@ -820,25 +820,25 @@ All UI components must use these colors consistently via CSS custom properties:
     - `*` -> `NotFound`
   - Wrap in `AuthProvider`
 
-- [ ] T041 Create `repos/frontend/src/components/ui/LoadingSpinner.tsx`
+- [x] T041 Create `repos/frontend/src/components/ui/LoadingSpinner.tsx`
   - Simple centered spinner component
   - Accept optional `size` prop
 
-- [ ] T042 [P] Create `repos/frontend/src/components/ui/EmptyState.tsx`
+- [x] T042 [P] Create `repos/frontend/src/components/ui/EmptyState.tsx`
   - Accept `message: string` prop
   - Centered text with optional icon
 
-- [ ] T043 [P] Create `repos/frontend/src/components/ui/ErrorBoundary.tsx`
+- [x] T043 [P] Create `repos/frontend/src/components/ui/ErrorBoundary.tsx`
   - Class component with `componentDidCatch`
   - Fallback UI: "Algo deu errado" with "Tentar novamente" button (reloads page)
 
-- [ ] T044 Create `repos/frontend/src/pages/Home.tsx`
+- [x] T044 Create `repos/frontend/src/pages/Home.tsx`
   - On mount: fetch subordinate evaluations via `getSubordinateEvaluations()`
   - Render `EmployeeList` component with data
   - Show `LoadingSpinner` while loading
   - Show `EmptyState` if no subordinates
 
-- [ ] T045 [P] Create `repos/frontend/src/components/employee/EmployeeList.tsx`
+- [x] T045 [P] Create `repos/frontend/src/components/employee/EmployeeList.tsx`
   - Accept `evaluations: SubordinateEvaluation[]` prop
   - Table: Employee Name, Position, Latest Score (or "Nao avaliado"), Date, Actions
   - **Note:** Email is NOT rendered in the UI (hidden from display)
@@ -847,7 +847,7 @@ All UI components must use these colors consistently via CSS custom properties:
   - If `latest_evaluation` exists and is from current week: show "Avaliado" badge (use `--color-muted` background), disable "Avaliar"
   - Display hierarchy depth indicator (e.g., indentation or badge showing "Direct" vs "Indirect")
 
-- [ ] T046 Create `repos/frontend/src/pages/NotFound.tsx`
+- [x] T046 Create `repos/frontend/src/pages/NotFound.tsx`
   - "Pagina nao encontrada" with link to `/`
 
 **After completing this phase**:
@@ -1014,18 +1014,18 @@ All UI components must use these colors consistently via CSS custom properties:
 - [ ] T034 Verify backend endpoints
 
 ### Phase 4: Frontend Foundation
-- [ ] T035 Create TypeScript types
-- [ ] T036 Create API service (Axios)
-- [ ] T037 Create useAuth hook (context)
-- [ ] T038 Create Layout component
-- [ ] T039 Create LeaderSelector component
-- [ ] T040 Create App.tsx (routing)
-- [ ] T041 Create LoadingSpinner
-- [ ] T042 Create EmptyState
-- [ ] T043 Create ErrorBoundary
-- [ ] T044 Create Home page
-- [ ] T045 Create EmployeeList component
-- [ ] T046 Create NotFound page
+- [x] T035 Create TypeScript types
+- [x] T036 Create API service (Axios)
+- [x] T037 Create useAuth hook (context)
+- [x] T038 Create Layout component
+- [x] T039 Create LeaderSelector component
+- [x] T040 Create App.tsx (routing)
+- [x] T041 Create LoadingSpinner
+- [x] T042 Create EmptyState
+- [x] T043 Create ErrorBoundary
+- [x] T044 Create Home page
+- [x] T045 Create EmployeeList component
+- [x] T046 Create NotFound page
 
 ### Phase 5: Frontend Features
 - [ ] T047 Create Evaluate page
@@ -1073,3 +1073,33 @@ All UI components must use these colors consistently via CSS custom properties:
 1. **EvaluationSummary response shape:** Add nested `questions` array to `EvaluationSummaryResponse` (aligns with integrations.md). Update T029, T035, T027, T051.
 2. **RN-12 implementation:** Follow plan (current leader only). RN-12 deferred to future enhancement.
 3. **Subordinate list nested questions:** Include nested questions in `GET /api/evaluations/subordinates` response for consistency.
+
+---
+
+## Execution Log
+
+### 2026-08-19 — Phase 4: Frontend Foundation (T035–T046)
+
+**Scope:** TypeScript types, Axios API service with cookie-based auth, Auth context (AuthProvider + useAuth), Layout with Header and LeaderSelector, React Router setup (/, /evaluate/:employeeId, /history/:employeeId, 404), UI primitives (LoadingSpinner, EmptyState, ErrorBoundary), Home page with subordinate evaluations, EmployeeList table with action buttons and current-week badge, NotFound page.
+
+**Tasks completed (fully):** T035, T036, T037, T038, T039, T040, T041, T042, T043, T044, T045, T046
+**Tasks completed (partially):** None
+**Tasks not executed in this run:** None (all Phase 4 tasks completed)
+
+**Deviations:** None — all tasks implemented as planned.
+
+**Unplanned changes:** None.
+
+**Files changed:**
+- `repos/frontend/src/types/index.ts` — TypeScript interfaces matching backend schemas
+- `repos/frontend/src/services/api.ts` — Axios instance with cookie-based auth interceptor
+- `repos/frontend/src/hooks/useAuth.tsx` — Auth context with localStorage persistence
+- `repos/frontend/src/components/layout/Layout.tsx` — App shell with header and LeaderSelector
+- `repos/frontend/src/components/layout/LeaderSelector.tsx` — Employee identity selection dropdown
+- `repos/frontend/src/App.tsx` — React Router setup with routes
+- `repos/frontend/src/components/ui/LoadingSpinner.tsx` — Loading spinner primitive
+- `repos/frontend/src/components/ui/EmptyState.tsx` — Empty state primitive
+- `repos/frontend/src/components/ui/ErrorBoundary.tsx` — React error boundary with retry
+- `repos/frontend/src/pages/Home.tsx` — Home page fetching subordinate evaluations
+- `repos/frontend/src/components/employee/EmployeeList.tsx` — Employee table with Avaliar/Histórico buttons
+- `repos/frontend/src/pages/NotFound.tsx` — 404 page with home link

@@ -773,7 +773,7 @@ Entry: Leader clicks "View History" for a subordinate
 
 **Add to Phase 4 (Frontend - Evaluation Form):**
 
-4. **Implement localStorage draft save for evaluation form** (`frontend/src/components/EvaluationForm.tsx`, `frontend/src/hooks/useEvaluationDraft.ts`):
+4. **Implement localStorage draft save for evaluation form** (`frontend/src/components/evaluation/EvaluationForm.tsx`, `frontend/src/hooks/useEvaluationDraft.ts`):
    - Create `useEvaluationDraft` hook that auto-saves form state to localStorage keyed by `{leaderId}-{employeeId}`
    - On form mount: check for existing draft and restore scores
    - On successful submit: clear draft from localStorage
@@ -783,7 +783,7 @@ Entry: Leader clicks "View History" for a subordinate
 
 **Add to Phase 4 (Frontend - Evaluation Form):**
 
-4. **Add confirmation dialog before evaluation submission** (`frontend/src/components/EvaluationForm.tsx`, `frontend/src/components/ConfirmDialog.tsx`):
+4. **Add confirmation dialog before evaluation submission** (`frontend/src/components/evaluation/EvaluationForm.tsx`, `frontend/src/components/evaluation/ConfirmDialog.tsx`):
    - Create `ConfirmDialog` component with message "Confirmar envio da avaliacao? Esta acao nao pode ser desfeita."
    - Wire to submit button: show dialog before POST request
    - Two buttons: "Confirmar" (proceed) and "Cancelar" (dismiss)
@@ -792,7 +792,7 @@ Entry: Leader clicks "View History" for a subordinate
 
 **Add to Phase 4 (Frontend - Components):**
 
-4. **Add loading states and skeleton UI components** (`frontend/src/components/LoadingSpinner.tsx`, `frontend/src/components/SkeletonList.tsx`):
+4. **Add loading states and skeleton UI components** (`frontend/src/components/ui/LoadingSpinner.tsx`, `frontend/src/components/ui/SkeletonList.tsx`):
    - Create `LoadingSpinner` component
    - Create `SkeletonList` component for subordinate list placeholder
    - Wrap API calls in subordinate list, evaluation form, and history view with loading state
@@ -801,7 +801,7 @@ Entry: Leader clicks "View History" for a subordinate
 
 **Add to Phase 4 (Frontend - App Structure):**
 
-4. **Add React ErrorBoundary** (`frontend/src/components/ErrorBoundary.tsx`, `frontend/src/App.tsx`):
+4. **Add React ErrorBoundary** (`frontend/src/components/ui/ErrorBoundary.tsx`, `frontend/src/App.tsx`):
    - Create `ErrorBoundary` class component with fallback UI
    - Wrap main route content in ErrorBoundary
    - Fallback shows "Algo deu errado" with retry button
@@ -860,7 +860,7 @@ Entry: Leader clicks "View History" for a subordinate
 
 **Add to Phase 4 (Frontend - Styles):**
 
-4. **Implement responsive layout** (`frontend/src/styles/`, all page components):
+4. **Implement responsive layout** (`frontend/src/index.css`, all page components):
    - Add CSS breakpoints: mobile (<768px), tablet (768-1024px), desktop (>1024px)
    - Stack form columns vertically on mobile
    - Ensure minimum 44px touch targets for buttons and inputs
@@ -890,7 +890,7 @@ Entry: Leader clicks "View History" for a subordinate
 
 **Add to Phase 4 (Frontend - Components):**
 
-4. **Add per-question evaluation detail breakdown** (`frontend/src/components/EvaluationDetail.tsx`):
+4. **Add per-question evaluation detail breakdown** (`frontend/src/components/history/EvaluationDetail.tsx`):
    - Create expandable row component in EvaluationHistory
    - On expand: show table with question title, weight, score, weighted contribution
    - Calculate contribution: `(score x weight) / 100`
@@ -910,7 +910,7 @@ Entry: Leader clicks "View History" for a subordinate
 **Add to Phase 3 (Backend - Routes):**
 
 3. **Add health check endpoint** (`backend/app/routes/health.py`, `backend/app/main.py`):
-   - Create `GET /api/health` returning `{ "status": "ok", "version": "1.0.0" }`
+   - Create `GET /api/health` returning `{ "status": "ok" }`
    - Register router in main.py
    - Use in Docker Compose `healthcheck` configuration
 
@@ -918,7 +918,7 @@ Entry: Leader clicks "View History" for a subordinate
 
 **Add to Phase 4 (Frontend - Auth):**
 
-4. **Implement cross-tab identity sync** (`frontend/src/hooks/useAuth.ts`):
+4. **Implement cross-tab identity sync** (`frontend/src/hooks/useAuth.tsx`):
    - Use localStorage with `storage` event listener
    - When another tab changes `employee_id`, re-fetch data in current tab
    - Use `AbortController` to cancel stale requests on identity change
@@ -927,7 +927,7 @@ Entry: Leader clicks "View History" for a subordinate
 
 **Add to Phase 4 (Frontend - API):**
 
-4. **Implement request cancellation on leader switch** (`frontend/src/services/api.ts`, `frontend/src/hooks/useAuth.ts`):
+4. **Implement request cancellation on leader switch** (`frontend/src/services/api.ts`, `frontend/src/hooks/useAuth.tsx`):
    - Maintain an `AbortController` per API service
    - On leader switch: abort all in-flight requests, create new controller
    - Pass signal to Axios requests
