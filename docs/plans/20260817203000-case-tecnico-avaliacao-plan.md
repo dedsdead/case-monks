@@ -526,42 +526,42 @@ All UI components must use these colors consistently via CSS custom properties:
 
 **Tasks**:
 
-- [ ] T001 [ADR] Write ADR-001 in `CaseTecnico_Workspace/docs/decisions/20260817-use-sql-dump-schema.md`
+- [ ] T001 [ADR] Write ADR-001 in `docs/decisions/20260817-use-sql-dump-schema.md`
   - Decision: Use SQL dump schema `(id, name, email, position_name)` + `leader_lead` M2M table
   - Consequences: All docs updated, `manager_id` FK approach abandoned
   - Reference: spec-flow-analysis §G1, §G2, Appendix D
 
-- [x] T002 [P] Update `CaseTecnico_Workspace/docs/architecture.md` Employee model section
+- [x] T002 [P] Update `docs/architecture.md` Employee model section
   - Replace `first_name, last_name, job_title, department, hire_date, manager_id` with `name, email, position_name`
   - Replace `manager_id` FK description with `leader_lead` M2M table
   - Add `evaluation_year` field to EvaluationResponse and EvaluationSummary
   - Remove `is_submitted` from EvaluationSummary (every row is submitted)
 
-- [x] T003 [P] Update `CaseTecnico_Workspace/docs/integrations.md` Employee schema
+- [x] T003 [P] Update `docs/integrations.md` Employee schema
   - Replace JSON schema: `{ "id": 1, "name": "Alice Hartman", "email": "alice@co.com", "position_name": "CEO" }`
   - Update API contract table with correct response shapes
 
-- [ ] T004 Create backend project structure in `CaseTecnico_Repos/backend/`
+- [ ] T004 Create backend project structure in `repos/backend/`
   - Create directory tree: `app/`, `app/models/`, `app/routers/`, `app/services/`, `app/schemas/`, `app/utils/`
   - Create `app/__init__.py`, `app/models/__init__.py`, etc.
   - Create `requirements.txt` with: fastapi, uvicorn[standard], sqlalchemy, alembic, pydantic, python-dotenv
 
-- [ ] T005 [P] Create `CaseTecnico_Repos/backend/app/config.py`
+- [ ] T005 [P] Create `repos/backend/app/config.py`
   - Pydantic Settings class reading from `.env`
   - Fields: `DATABASE_URL` (default `sqlite:///./data/casetecnico.db`), `API_HOST`, `API_PORT`, `DEBUG`
   - CORS origins list: `["http://localhost:3000", "http://localhost:5173"]`
 
-- [ ] T006 [P] Create `CaseTecnico_Repos/backend/app/database.py`
+- [ ] T006 [P] Create `repos/backend/app/database.py`
   - SQLAlchemy `create_engine` with `check_same_thread=False`, `pool_pre_ping=True`
   - `@event.listens_for(engine, "connect")` setting WAL pragmas: `journal_mode=WAL`, `synchronous=NORMAL`, `busy_timeout=5000`, `foreign_keys=ON`, `cache_size=-64000`
   - `SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)`
   - `Base = DeclarativeBase` (SQLAlchemy 2.x style)
 
-- [ ] T007 Create `CaseTecnico_Repos/backend/.env` with default values
+- [ ] T007 Create `repos/backend/.env` with default values
   - `DATABASE_URL=sqlite:///./data/casetecnico.db`
   - `API_HOST=0.0.0.0`, `API_PORT=8000`, `DEBUG=true`
 
-- [ ] T008 Initialize frontend project in `CaseTecnico_Repos/frontend/`
+- [ ] T008 Initialize frontend project in `repos/frontend/`
   - Run `npm create vite@latest . -- --template react-ts` (or manually create package.json + vite.config.ts + tsconfig.json)
   - Install dependencies: `react-router-dom`, `axios`
   - Create `src/` directory structure
@@ -577,33 +577,33 @@ All UI components must use these colors consistently via CSS custom properties:
     body { background-color: var(--color-background); color: var(--color-primary); }
     ```
 
-- [ ] T009 [P] Create `CaseTecnico_Repos/frontend/vite.config.ts`
+- [ ] T009 [P] Create `repos/frontend/vite.config.ts`
   - Configure proxy: `/api` -> `http://localhost:8000`
   - Set port to 3000
 
-- [ ] T010 Create `CaseTecnico_Repos/frontend/.env`
+- [ ] T010 Create `repos/frontend/.env`
   - `VITE_API_URL=http://localhost:8000`
   - `VITE_APP_TITLE=CaseTecnico - Avaliacao de Liderados`
 
-- [ ] T011 Create `CaseTecnico_Repos/backend/Dockerfile`
+- [ ] T011 Create `repos/backend/Dockerfile`
   - FROM python:3.10-slim
   - WORKDIR /app, COPY requirements.txt, RUN pip install
   - COPY . .
   - CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
 
-- [ ] T012 [P] Create `CaseTecnico_Repos/frontend/Dockerfile`
+- [ ] T012 [P] Create `repos/frontend/Dockerfile`
   - FROM node:18-alpine as build
   - WORKDIR /app, COPY package*.json, RUN npm install, COPY . , RUN npm run build
   - FROM nginx:alpine, COPY --from=build /app/dist /usr/share/nginx/html
-  - COPY `CaseTecnico_Repos/frontend/nginx.conf` to `/etc/nginx/conf.d/default.conf`
+  - COPY `repos/frontend/nginx.conf` to `/etc/nginx/conf.d/default.conf`
   - EXPOSE 80
 
-- [ ] T012b [P] Create `CaseTecnico_Repos/frontend/nginx.conf`
+- [ ] T012b [P] Create `repos/frontend/nginx.conf`
   - `server { listen 80; location / { root /usr/share/nginx/html; try_files $uri $uri/ /index.html; } location /api { proxy_pass http://backend:8000; proxy_set_header Host $host; proxy_set_header X-Real-IP $remote_addr; } }`
   - Proxies `/api` to backend service in Docker network
   - SPA fallback for client-side routing
 
-- [ ] T013 Create `CaseTecnico_Workspace/docker-compose.yml`
+- [ ] T013 Create `docker-compose.yml`
   - Services: `backend` (port 8000, volume for SQLite data), `frontend` (port 3000, proxy to backend)
   - Backend healthcheck: `curl -f http://localhost:8000/api/health || exit 1`
   - Frontend depends_on backend with condition: service_healthy
@@ -617,54 +617,54 @@ All UI components must use these colors consistently via CSS custom properties:
 
 ### Phase 2: Database Layer
 
-**Status**: ⬜ Pending
+**Status**: ✅ Completed
 **Objective**: Define all SQLAlchemy models, create Alembic migration, seed data
 **Dependencies**: Phase 1
 
 **Tasks**:
 
-- [ ] T014 Create `CaseTecnico_Repos/backend/app/models/employee.py`
+- [x] T014 Create `repos/backend/app/models/employee.py`
   - `class Employee(Base)`: `__tablename__ = "employee"`, columns: `id: Mapped[int] = mapped_column(primary_key=True)`, `name: Mapped[str] = mapped_column(String(100))`, `email: Mapped[str] = mapped_column(String(150), unique=True)`, `position_name: Mapped[str] = mapped_column(String(100))`
   - `class LeaderLead(Base)`: `__tablename__ = "leader_lead"`, columns: `leader_id: Mapped[int] = mapped_column(ForeignKey("employee.id"), primary_key=True)`, `lead_id: Mapped[int] = mapped_column(ForeignKey("employee.id"), primary_key=True)`
   - Table args: `CheckConstraint("leader_id <> lead_id", name="chk_no_self_lead")`, `Index("ix_leader_lead_reverse", "lead_id")`
 
-- [ ] T015 [P] Create `CaseTecnico_Repos/backend/app/models/evaluation_question.py`
+- [x] T015 [P] Create `repos/backend/app/models/evaluation_question.py`
   - `class EvaluationQuestion(Base)`: `__tablename__ = "evaluation_question"`
   - Columns: `id: Mapped[int] (PK)`, `title: Mapped[str]`, `weight: Mapped[int]`, `order: Mapped[int]`
 
-- [ ] T016 [P] Create `CaseTecnico_Repos/backend/app/models/evaluation_summary.py`
+- [x] T016 [P] Create `repos/backend/app/models/evaluation_summary.py`
   - `class EvaluationSummary(Base)`: `__tablename__ = "evaluation_summary"`
   - Columns: `id: Mapped[int] (PK)`, `employee_id: Mapped[int] (FK employee.id)`, `evaluator_id: Mapped[int] (FK employee.id)`, `total_score: Mapped[float]`, `evaluation_date: Mapped[datetime]`, `evaluation_year: Mapped[int]`, `week_number: Mapped[int]`
   - Table args: `UniqueConstraint("evaluator_id", "employee_id", "evaluation_year", "week_number", name="uq_evaluator_employee_week")`, `Index("ix_eval_summary_employee_evaluator", "employee_id", "evaluator_id")`, `Index("ix_eval_summary_latest", "employee_id", "evaluator_id", "evaluation_date")`
   - Note: No `is_submitted` column — every row represents a submitted evaluation
 
-- [ ] T017 [P] Create `CaseTecnico_Repos/backend/app/models/evaluation_response.py`
+- [x] T017 [P] Create `repos/backend/app/models/evaluation_response.py`
   - `class EvaluationResponse(Base)`: `__tablename__ = "evaluation_response"`
   - Columns: `id: Mapped[int] (PK)`, `evaluation_summary_id: Mapped[int] (FK evaluation_summary.id)`, `question_id: Mapped[int] (FK evaluation_question.id)`, `score: Mapped[int]`
   - Table args: `UniqueConstraint("evaluation_summary_id", "question_id", name="uq_eval_response_summary_question")`, `Index("ix_eval_response_question", "question_id")`
   - UNIQUE constraint prevents duplicate responses per question per evaluation
 
-- [ ] T018 [P] Update `CaseTecnico_Repos/backend/app/models/__init__.py`
+- [x] T018 [P] Update `repos/backend/app/models/__init__.py`
   - Import all models: `Employee`, `LeaderLead`, `EvaluationQuestion`, `EvaluationSummary`, `EvaluationResponse`
   - Export `Base` for Alembic
 
-- [ ] T019 Initialize Alembic in `CaseTecnico_Repos/backend/`
+- [x] T019 Initialize Alembic in `repos/backend/`
   - Run `alembic init alembic`
   - Configure `alembic.ini`: `sqlalchemy.url = sqlite:///./data/casetecnico.db`
   - Configure `alembic/env.py`: import `Base.metadata` for autogenerate target
   - Set `render_as_batch=True` in Alembic config (required for SQLite)
 
-- [ ] T020 Generate initial Alembic migration
+- [x] T020 Generate initial Alembic migration
   - Run `alembic revision --autogenerate -m "initial schema"`
   - Verify generated migration creates: employee, leader_lead, evaluation_question, evaluation_response, evaluation_summary
   - Verify indexes and constraints are included
 
-- [ ] T021 Run migration locally IMMEDIATELY (atomic chain)
+- [x] T021 Run migration locally IMMEDIATELY (atomic chain)
   - Run `alembic upgrade head`
   - Verify tables exist in SQLite database
   - This prevents schema drift in subsequent migrations
 
-- [ ] T022 Create `CaseTecnico_Repos/backend/app/services/seed.py`
+- [x] T022 Create `repos/backend/app/services/seed.py`
   - `def seed_database(db: Session) -> None`
   - Check if `employee` table already has data; return early if so (idempotent)
   - Insert 20 employees from SQL dump (adapted for SQLite: no `SERIAL`, no `setval`)
@@ -672,43 +672,43 @@ All UI components must use these colors consistently via CSS custom properties:
   - Insert 6 `evaluation_question` rows with titles, weights, and order from brainstorm
   - Use SQLAlchemy `insert()` with `prefixes=["OR IGNORE"]` or check-before-insert for idempotency
 
-- [ ] T023 [P] Create `CaseTecnico_Repos/backend/app/utils/week.py`
+- [x] T023 [P] Create `repos/backend/app/utils/week.py`
   - `def get_current_iso_week() -> tuple[int, int]`: returns `(year, week_number)` using `datetime.now().isocalendar()`
   - `def get_week_number(dt: datetime) -> tuple[int, int]`: returns `(year, week_number)` for a given datetime
 
 **After completing this phase**:
-1. Run `alembic upgrade head` — verify database schema
-2. Run seed function — verify 20 employees + 19 relationships + 6 questions loaded
-3. Update this plan — mark Phase 2 as `✅ Completed`
+1. ✅ Run `alembic upgrade head` — verify database schema
+2. ✅ Run seed function — verify 20 employees + 19 relationships + 6 questions loaded
+3. ✅ Update this plan — mark Phase 2 as `✅ Completed`
 
 ---
 
 ### Phase 3: Backend API
 
-**Status**: ⬜ Pending
+**Status**: ✅ Completed
 **Objective**: Implement all API endpoints with auth, hierarchy validation, evaluation logic
 **Dependencies**: Phase 2
 
 **Tasks**:
 
-- [ ] T024 Create `CaseTecnico_Repos/backend/app/dependencies.py`
+- [ ] T024 Create `repos/backend/app/dependencies.py`
   - `def get_db() -> Generator[Session]`: yield SessionLocal, close in finally
   - `def get_employee_id_from_cookie(employee_id: str | None = Cookie(default=None)) -> str`: raise 401 if missing
   - `def get_current_employee(employee_id: Annotated[str, Depends(get_employee_id_from_cookie)], db: Session = Depends(get_db)) -> Employee`: query Employee by id, raise 401 if not found
 
-- [ ] T025 [P] Create `CaseTecnico_Repos/backend/app/exceptions.py`
+- [ ] T025 [P] Create `repos/backend/app/exceptions.py`
   - `class WeeklyLimitExceeded(HTTPException)`: status 409, detail with message and existing_evaluation_id
   - `class HierarchyViolation(HTTPException)`: status 403
   - `class SelfEvaluationBlocked(HTTPException)`: status 403
   - `class EmployeeNotFound(HTTPException)`: status 404
 
-- [ ] T026 Create `CaseTecnico_Repos/backend/app/services/hierarchy.py`
+- [ ] T026 Create `repos/backend/app/services/hierarchy.py`
   - `def get_all_subordinates(db: Session, leader_id: int) -> list[int]`: CTE recursive query through `leader_lead` using `UNION` (not `UNION ALL`) for cycle safety. Anchor: `SELECT lead_id FROM leader_lead WHERE leader_id = :leader_id`. Recursive: join `leader_lead` to CTE alias. Return list of lead_id values.
   - `def get_all_subordinates_with_depth(db: Session, leader_id: int) -> list[tuple[int, int]]`: Same CTE but also tracks recursion depth (0 for direct reports, incremented per level). Returns `(lead_id, depth)` tuples. Used for hierarchy-depth sorting.
   - `def is_ancestor_of(db: Session, ancestor_id: int, descendant_id: int) -> bool`: call `get_all_subordinates(ancestor_id)`, check `descendant_id in result`
   - **CTE caching:** Implement `_subordinate_cache: dict[int, tuple[float, list[int]]]` module-level dict. On lookup, check if `time.time() - timestamp > 300`; if expired or missing, recompute CTE and store. On write operations (create_evaluation), call `_subordinate_cache.clear()` to invalidate. Wrap in helper `_get_cached_subordinates(db, leader_id)` for clean usage.
 
-- [ ] T027 Create `CaseTecnico_Repos/backend/app/services/evaluation.py`
+- [ ] T027 Create `repos/backend/app/services/evaluation.py`
   - `def create_evaluation(db: Session, evaluator_id: int, data: EvaluationCreate) -> EvaluationSummary`:
     1. Validate `evaluator_id != data.employee_id` (self-eval check)
     2. Validate `is_ancestor_of(db, evaluator_id, data.employee_id)` (hierarchy check)
@@ -721,10 +721,10 @@ All UI components must use these colors consistently via CSS custom properties:
   - `def get_subordinate_evaluations(db: Session, leader_id: int) -> list[SubordinateEvaluationResponse]`: Use CTE to rank evaluations: `WITH ranked AS (SELECT es.*, ROW_NUMBER() OVER (PARTITION BY es.employee_id ORDER BY es.evaluation_date DESC) AS rn FROM evaluation_summary es JOIN subordinate_ids s ON es.employee_id = s.lead_id WHERE es.evaluator_id = :leader_id)`. Then LEFT JOIN ranked (WHERE rn = 1) with employee info. Return one `SubordinateEvaluationResponse` per subordinate with `latest_evaluation` or null. **Sort by depth ASC** (hierarchy top-down: CEO first, then direct reports, then indirect).
   - `def get_evaluation_history(db: Session, evaluator_id: int, employee_id: int) -> list[EvaluationSummaryResponse]`: Validate hierarchy, return all summaries with nested question responses ordered by evaluation_date DESC
 
-- [ ] T028 Create `CaseTecnico_Repos/backend/app/schemas/employee.py`
+- [ ] T028 Create `repos/backend/app/schemas/employee.py`
   - `class EmployeeResponse(BaseModel)`: `model_config = ConfigDict(from_attributes=True)`. Fields: `id: int`, `name: str`, `email: str`, `position_name: str`
 
-- [ ] T029 [P] Create `CaseTecnico_Repos/backend/app/schemas/evaluation.py`
+- [ ] T029 [P] Create `repos/backend/app/schemas/evaluation.py`
   - `class ScoreInput(BaseModel)`: `model_config = ConfigDict(extra="forbid")`. Fields: `question_id: int = Field(ge=1, le=6)`, `score: int = Field(ge=1, le=4)`
   - `class EvaluationCreate(BaseModel)`: `model_config = ConfigDict(extra="forbid")`. Fields: `employee_id: int`, `scores: list[ScoreInput]`. Validator: `len(scores) == 6`, all question_ids unique and == {1,2,3,4,5,6}
   - `class EvaluationSummaryResponse(BaseModel)`: `model_config = ConfigDict(from_attributes=True)`. Fields: `id, employee_id, evaluator_id, total_score, evaluation_date, evaluation_year, week_number, questions: list[QuestionScoreResponse]`
@@ -732,24 +732,24 @@ All UI components must use these colors consistently via CSS custom properties:
   - `class QuestionScoreResponse(BaseModel)`: `model_config = ConfigDict(from_attributes=True)`. Fields: `question_id, title, weight, score`
   - `class SubordinateEvaluationResponse(BaseModel)`: `employee_id: int`, `employee_name: str`, `position_name: str`, `latest_evaluation: EvaluationSummaryResponse | None`, `depth: int`
 
-- [ ] T030 Create `CaseTecnico_Repos/backend/app/routers/health.py`
+- [ ] T030 Create `repos/backend/app/routers/health.py`
   - `router = APIRouter(tags=["health"])`
   - `@router.get("/api/health")`: return `{"status": "ok"}`
 
-- [ ] T031 Create `CaseTecnico_Repos/backend/app/routers/employees.py`
+- [ ] T031 Create `repos/backend/app/routers/employees.py`
   - `router = APIRouter(prefix="/api/employees", tags=["employees"])`
   - `@router.get("/")`: return all employees (for identity selector dropdown)
   - `@router.get("/{employee_id}"): return employee by id; 404 if not found
   - `@router.get("/{employee_id}/subordinates")`: get current user from cookie, validate hierarchy, return `get_all_subordinates()` as Employee list
 
-- [ ] T032 [P] Create `CaseTecnico_Repos/backend/app/routers/evaluations.py`
+- [ ] T032 [P] Create `repos/backend/app/routers/evaluations.py`
   - `router = APIRouter(prefix="/api/evaluations", tags=["evaluations"])`
   - `@router.get("/questions")`: return all EvaluationQuestion rows ordered by `order`
   - `@router.post("/", status_code=201)`: get current user from cookie, call `create_evaluation()`, return EvaluationSummaryResponse
   - `@router.get("/subordinates")`: get current user from cookie, call `get_subordinate_evaluations()`, return list
   - `@router.get("/employee/{employee_id}")`: get current user from cookie, validate hierarchy, call `get_evaluation_history()`, return list
 
-- [ ] T033 Create `CaseTecnico_Repos/backend/app/main.py`
+- [ ] T033 Create `repos/backend/app/main.py`
   - Import FastAPI, CORSMiddleware
   - Create `app = FastAPI(title="CaseTecnico API", version="1.0.0")`
   - Add CORSMiddleware: `allow_origins=["http://localhost:3000", "http://localhost:5173"]`, `allow_credentials=True`, `allow_methods=["GET", "POST", "OPTIONS"]`, `allow_headers=["Content-Type", "Cookie"]`
@@ -780,7 +780,7 @@ All UI components must use these colors consistently via CSS custom properties:
 
 **Tasks**:
 
-- [ ] T035 Create `CaseTecnico_Repos/frontend/src/types/index.ts`
+- [ ] T035 Create `repos/frontend/src/types/index.ts`
   - `interface Employee { id: number; name: string; email: string; position_name: string; }`
   - `interface Question { id: number; title: string; weight: number; order: number; }`
   - `interface QuestionScore { question_id: number; title: string; weight: number; score: number; }`
@@ -789,30 +789,30 @@ All UI components must use these colors consistently via CSS custom properties:
   - `interface EvaluationSummary { id: number; employee_id: number; evaluator_id: number; total_score: number; evaluation_date: string; evaluation_year: number; week_number: number; questions: QuestionScore[]; }`
   - `interface SubordinateEvaluation { employee_id: number; employee_name: string; position_name: string; latest_evaluation: EvaluationSummary | null; depth: number; }`
 
-- [ ] T036 Create `CaseTecnico_Repos/frontend/src/services/api.ts`
+- [ ] T036 Create `repos/frontend/src/services/api.ts`
   - `const api = axios.create({ baseURL: '/api' })` (works with Vite proxy)
   - Interceptor: read `employee_id` from localStorage, set as `Cookie: employee_id=...` header on every request
   - Export methods: `getEmployees()`, `getEmployee(id)`, `getSubordinates(id)`, `getQuestions()`, `submitEvaluation(data)`, `getSubordinateEvaluations()`, `getEvaluationHistory(employeeId)`
 
-- [ ] T037 Create `CaseTecnico_Repos/frontend/src/hooks/useAuth.ts`
+- [ ] T037 Create `repos/frontend/src/hooks/useAuth.ts`
   - `AuthContext` with `employeeId: number | null`, `setEmployeeId(id: number)`, `clearEmployee()`
   - Provider reads from `localStorage` on mount
   - `setEmployeeId` writes to `localStorage` and updates state
   - `clearEmployee` removes from `localStorage` and updates state
 
-- [ ] T038 Create `CaseTecnico_Repos/frontend/src/components/layout/Layout.tsx`
+- [ ] T038 Create `repos/frontend/src/components/layout/Layout.tsx`
   - App shell: header with LeaderSelector + main content area
   - Uses `useAuth` to get current employee
   - If no employee_id: render LeaderSelector full-page prompt
   - Otherwise: render header + `<Outlet />`
 
-- [ ] T039 [P] Create `CaseTecnico_Repos/frontend/src/components/layout/LeaderSelector.tsx`
+- [ ] T039 [P] Create `repos/frontend/src/components/layout/LeaderSelector.tsx`
   - Fetches all employees via `getEmployees()`
   - Dropdown with employee names — use `--color-border` border, `--color-background` background, `--color-primary` text
   - On select: call `setEmployeeId(id)`, page reloads/re-fetches
   - Shows "Selecione sua identidade" prompt when no identity selected — use `--color-primary` text, `--color-background` background
 
-- [ ] T040 Create `CaseTecnico_Repos/frontend/src/App.tsx`
+- [ ] T040 Create `repos/frontend/src/App.tsx`
   - `BrowserRouter` with routes:
     - `/` -> `Layout` -> `Home`
     - `/evaluate/:employeeId` -> `Layout` -> `Evaluate`
@@ -820,25 +820,25 @@ All UI components must use these colors consistently via CSS custom properties:
     - `*` -> `NotFound`
   - Wrap in `AuthProvider`
 
-- [ ] T041 Create `CaseTecnico_Repos/frontend/src/components/ui/LoadingSpinner.tsx`
+- [ ] T041 Create `repos/frontend/src/components/ui/LoadingSpinner.tsx`
   - Simple centered spinner component
   - Accept optional `size` prop
 
-- [ ] T042 [P] Create `CaseTecnico_Repos/frontend/src/components/ui/EmptyState.tsx`
+- [ ] T042 [P] Create `repos/frontend/src/components/ui/EmptyState.tsx`
   - Accept `message: string` prop
   - Centered text with optional icon
 
-- [ ] T043 [P] Create `CaseTecnico_Repos/frontend/src/components/ui/ErrorBoundary.tsx`
+- [ ] T043 [P] Create `repos/frontend/src/components/ui/ErrorBoundary.tsx`
   - Class component with `componentDidCatch`
   - Fallback UI: "Algo deu errado" with "Tentar novamente" button (reloads page)
 
-- [ ] T044 Create `CaseTecnico_Repos/frontend/src/pages/Home.tsx`
+- [ ] T044 Create `repos/frontend/src/pages/Home.tsx`
   - On mount: fetch subordinate evaluations via `getSubordinateEvaluations()`
   - Render `EmployeeList` component with data
   - Show `LoadingSpinner` while loading
   - Show `EmptyState` if no subordinates
 
-- [ ] T045 [P] Create `CaseTecnico_Repos/frontend/src/components/employee/EmployeeList.tsx`
+- [ ] T045 [P] Create `repos/frontend/src/components/employee/EmployeeList.tsx`
   - Accept `evaluations: SubordinateEvaluation[]` prop
   - Table: Employee Name, Position, Latest Score (or "Nao avaliado"), Date, Actions
   - **Note:** Email is NOT rendered in the UI (hidden from display)
@@ -847,7 +847,7 @@ All UI components must use these colors consistently via CSS custom properties:
   - If `latest_evaluation` exists and is from current week: show "Avaliado" badge (use `--color-muted` background), disable "Avaliar"
   - Display hierarchy depth indicator (e.g., indentation or badge showing "Direct" vs "Indirect")
 
-- [ ] T046 Create `CaseTecnico_Repos/frontend/src/pages/NotFound.tsx`
+- [ ] T046 Create `repos/frontend/src/pages/NotFound.tsx`
   - "Pagina nao encontrada" with link to `/`
 
 **After completing this phase**:
@@ -865,7 +865,7 @@ All UI components must use these colors consistently via CSS custom properties:
 
 **Tasks**:
 
-- [ ] T047 Create `CaseTecnico_Repos/frontend/src/pages/Evaluate.tsx`
+- [ ] T047 Create `repos/frontend/src/pages/Evaluate.tsx`
   - Read `employeeId` from URL params
   - Fetch employee details + questions on mount
   - Validate employee is in subordinate list (redirect if not)
@@ -874,7 +874,7 @@ All UI components must use these colors consistently via CSS custom properties:
   - Render `EvaluationForm` component
   - Show `LoadingSpinner` while loading
 
-- [ ] T048 [P] Create `CaseTecnico_Repos/frontend/src/components/evaluation/EvaluationForm.tsx`
+- [ ] T048 [P] Create `repos/frontend/src/components/evaluation/EvaluationForm.tsx`
   - Accept `employee: Employee`, `questions: Question[]` props
   - Local state: `scores: Record<number, number>` (question_id -> score)
   - For each question: display title, weight, numeric input (1-4)
@@ -886,29 +886,29 @@ All UI components must use these colors consistently via CSS custom properties:
   - On 409: show "Ja avaliou esta semana"
   - On 403: show access denied, navigate to `/`
 
-- [ ] T049 Create `CaseTecnico_Repos/frontend/src/components/evaluation/ConfirmDialog.tsx`
+- [ ] T049 Create `repos/frontend/src/components/evaluation/ConfirmDialog.tsx`
   - Accept `isOpen: boolean`, `onConfirm: () => void`, `onCancel: () => void`
   - Modal: "Confirmar envio da avaliacao? Esta acao nao pode ser desfeita."
   - Two buttons: "Confirmar" (`--color-primary` background) and "Cancelar" (`--color-border` background)
 
-- [ ] T050 [P] Create `CaseTecnico_Repos/frontend/src/pages/History.tsx`
+- [ ] T050 [P] Create `repos/frontend/src/pages/History.tsx`
   - Read `employeeId` from URL params
   - Fetch employee details + evaluation history on mount
   - Validate hierarchy (redirect if 403)
   - Render `EvaluationHistory` component
 
-- [ ] T051 Create `CaseTecnico_Repos/frontend/src/components/history/EvaluationHistory.tsx`
+- [ ] T051 Create `repos/frontend/src/components/history/EvaluationHistory.tsx`
   - Accept `history: EvaluationSummary[]`, `employeeName: string`
   - Table: Week, Year, Date, Total Score, expandable rows
   - Expandable row: `EvaluationDetail` component with per-question breakdown
   - Empty state: "Nenhuma avaliacao registrada para este funcionario"
 
-- [ ] T052 [P] Create `CaseTecnico_Repos/frontend/src/components/history/EvaluationDetail.tsx`
+- [ ] T052 [P] Create `repos/frontend/src/components/history/EvaluationDetail.tsx`
   - Accept `summary: EvaluationSummary` prop
   - Table: Question Title, Weight, Score, Weighted Contribution (score * weight / 100)
   - Total row at bottom
 
-- [ ] T053 Expand responsive CSS in `CaseTecnico_Repos/frontend/src/index.css`
+- [ ] T053 Expand responsive CSS in `repos/frontend/src/index.css`
   - CSS custom properties already defined in T008 — verify tokens are present
   - Add responsive breakpoints using the color palette tokens:
     - Mobile breakpoint: `< 768px` — stack columns, full-width buttons
@@ -917,7 +917,7 @@ All UI components must use these colors consistently via CSS custom properties:
   - Minimum touch targets: 44px height for buttons and inputs
   - Table horizontal scroll on mobile
 
-- [ ] T054 Create `CaseTecnico_Repos/frontend/src/components/ui/Toast.tsx`
+- [ ] T054 Create `repos/frontend/src/components/ui/Toast.tsx`
   - Simple toast notification component (no external library)
   - Props: `message: string`, `type: 'success' | 'error'`, `onClose: () => void`
   - Success: `--color-primary` background, `--color-background` text, auto-dismiss after 3s
@@ -942,7 +942,7 @@ All UI components must use these colors consistently via CSS custom properties:
 
 **Tasks**:
 
-- [ ] T055 Create `CaseTecnico_Workspace/README.md` (or `CaseTecnico_Repos/README.md`)
+- [ ] T055 Create `README.md` (or `repos/README.md`)
   - Project overview
   - Architecture diagram (ASCII or description)
   - Setup instructions: prerequisites, install, run
