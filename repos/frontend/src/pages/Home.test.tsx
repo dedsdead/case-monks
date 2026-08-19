@@ -70,7 +70,7 @@ describe("Home", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText("Erro ao carregar subordinados."),
+        screen.getByText(/erro ao carregar subordinados/i),
       ).toBeInTheDocument();
     });
   });

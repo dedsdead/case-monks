@@ -28,7 +28,7 @@ beforeEach(() => {
 });
 
 describe("API service", () => {
-  it("getEmployees calls GET /employees", async () => {
+  it("getEmployees calls GET /employees/", async () => {
     const mockData = [
       { id: 1, name: "Alice", email: "a@co.com", position_name: "CEO" },
     ];
@@ -38,11 +38,11 @@ describe("API service", () => {
 
     const result = await api.getEmployees();
 
-    expect(instance.get).toHaveBeenCalledWith("/employees");
+    expect(instance.get).toHaveBeenCalledWith("/employees/", { signal: undefined });
     expect(result).toEqual(mockData);
   });
 
-  it("getEmployee calls GET /employees/:id", async () => {
+  it("getEmployee calls GET /employees/:id/", async () => {
     const mockEmp = {
       id: 1,
       name: "Alice",
@@ -55,27 +55,31 @@ describe("API service", () => {
 
     const result = await api.getEmployee(1);
 
-    expect(instance.get).toHaveBeenCalledWith("/employees/1");
+    expect(instance.get).toHaveBeenCalledWith("/employees/1/", { signal: undefined });
     expect(result).toEqual(mockEmp);
   });
 
-  it("getSubordinates calls GET /employees/:id/subordinates", async () => {
+  it("getSubordinates calls GET /employees/:id/subordinates/", async () => {
     (instance.get as ReturnType<typeof vi.fn>).mockResolvedValue({ data: [] });
 
     await api.getSubordinates(1);
 
-    expect(instance.get).toHaveBeenCalledWith("/employees/1/subordinates");
+    expect(instance.get).toHaveBeenCalledWith("/employees/1/subordinates/", {
+      signal: undefined,
+    });
   });
 
-  it("getQuestions calls GET /evaluations/questions", async () => {
+  it("getQuestions calls GET /evaluations/questions/", async () => {
     (instance.get as ReturnType<typeof vi.fn>).mockResolvedValue({ data: [] });
 
     await api.getQuestions();
 
-    expect(instance.get).toHaveBeenCalledWith("/evaluations/questions");
+    expect(instance.get).toHaveBeenCalledWith("/evaluations/questions/", {
+      signal: undefined,
+    });
   });
 
-  it("submitEvaluation calls POST /evaluations", async () => {
+  it("submitEvaluation calls POST /evaluations/", async () => {
     const payload = {
       employee_id: 1,
       scores: [
@@ -103,24 +107,30 @@ describe("API service", () => {
 
     const result = await api.submitEvaluation(payload);
 
-    expect(instance.post).toHaveBeenCalledWith("/evaluations", payload);
+    expect(instance.post).toHaveBeenCalledWith("/evaluations/", payload, {
+      signal: undefined,
+    });
     expect(result).toEqual(mockSummary);
   });
 
-  it("getSubordinateEvaluations calls GET /evaluations/subordinates", async () => {
+  it("getSubordinateEvaluations calls GET /evaluations/subordinates/", async () => {
     (instance.get as ReturnType<typeof vi.fn>).mockResolvedValue({ data: [] });
 
     await api.getSubordinateEvaluations();
 
-    expect(instance.get).toHaveBeenCalledWith("/evaluations/subordinates");
+    expect(instance.get).toHaveBeenCalledWith("/evaluations/subordinates/", {
+      signal: undefined,
+    });
   });
 
-  it("getEvaluationHistory calls GET /evaluations/employee/:id", async () => {
+  it("getEvaluationHistory calls GET /evaluations/employee/:id/", async () => {
     (instance.get as ReturnType<typeof vi.fn>).mockResolvedValue({ data: [] });
 
     await api.getEvaluationHistory(5);
 
-    expect(instance.get).toHaveBeenCalledWith("/evaluations/employee/5");
+    expect(instance.get).toHaveBeenCalledWith("/evaluations/employee/5/", {
+      signal: undefined,
+    });
   });
 
   it("interceptor sets Cookie header from localStorage", () => {

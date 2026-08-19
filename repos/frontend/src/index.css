@@ -26,3 +26,32 @@ body {
 * {
   box-sizing: border-box;
 }
+
+button, input, select {
+  min-height: 44px;
+}
+
+@media (max-width: 768px) {
+  main {
+    padding: 1rem !important;
+  }
+
+  table {
+    font-size: 0.85rem;
+  }
+
+  th, td {
+    padding: 0.5rem !important;
+  }
+
+  button {
+    min-height: 44px;
+    width: 100%;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  main {
+    padding: 1.25rem !important;
+  }
+}
