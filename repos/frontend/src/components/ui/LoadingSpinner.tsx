@@ -5,6 +5,8 @@ interface LoadingSpinnerProps {
 export function LoadingSpinner({ size = 32 }: LoadingSpinnerProps) {
   return (
     <div
+      role="status"
+      aria-label="Carregando"
       style={{
         display: "flex",
         justifyContent: "center",

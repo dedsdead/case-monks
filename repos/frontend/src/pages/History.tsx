@@ -1,45 +1,63 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getEmployee, getEvaluationHistory } from "../services/api";
 import type { Employee, EvaluationSummary } from "../types";
 import { EvaluationHistory } from "../components/history/EvaluationHistory";
 import { LoadingSpinner } from "../components/ui/LoadingSpinner";
+import { EmptyState } from "../components/ui/EmptyState";
 import { Toast } from "../components/ui/Toast";
+import { useLanguage } from "../i18n/LanguageContext";
 
 export function History() {
   const { employeeId } = useParams<{ employeeId: string }>();
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [employee, setEmployee] = useState<Employee | null>(null);
   const [history, setHistory] = useState<EvaluationSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (!employeeId) return;
     const ctrl = new AbortController();
 
-    Promise.all([
-      getEmployee(Number(employeeId), ctrl.signal),
-      getEvaluationHistory(Number(employeeId), ctrl.signal),
-    ])
-      .then(([emp, hist]) => {
+    getEmployee(Number(employeeId), ctrl.signal)
+      .then(emp => {
         if (ctrl.signal.aborted) return;
         setEmployee(emp);
-        setHistory(hist);
+
+        return getEvaluationHistory(Number(employeeId), ctrl.signal);
+      })
+      .then(hist => {
+        if (ctrl.signal.aborted) return;
+        if (hist) {
+          setHistory(hist);
+        }
       })
       .catch((err) => {
         if (ctrl.signal.aborted) return;
         const status = err?.response?.status;
+
         if (status === 403) {
           setToast({
-            message: "Você não tem acesso para visualizar este funcionário",
+            message: t('accessDeniedError'),
             type: "error",
           });
-          timerRef.current = setTimeout(() => navigate("/"), 2000);
+        } else if (status === 404) {
+          setToast({
+            message: t('employeeNotFoundError'),
+            type: "error",
+          });
+        } else if (status >= 500) {
+          setToast({
+            message: t('serverError'),
+            type: "error",
+          });
         } else {
-          setToast({ message: "Funcionário não encontrado", type: "error" });
-          timerRef.current = setTimeout(() => navigate("/"), 2000);
+          setToast({
+            message: t('loadDataError'),
+            type: "error",
+          });
         }
       })
       .finally(() => {
@@ -48,18 +66,105 @@ export function History() {
 
     return () => {
       ctrl.abort();
-      if (timerRef.current) clearTimeout(timerRef.current);
     };
-  }, [employeeId, navigate]);
+  }, [employeeId, navigate, t]);
+
+  const handleGoBack = () => {
+    navigate("/");
+  };
+
+  const handleRefresh = () => {
+    setLoading(true);
+    setToast(null);
+    const ctrl = new AbortController();
+
+    getEmployee(Number(employeeId), ctrl.signal)
+      .then(emp => {
+        if (ctrl.signal.aborted) return;
+        setEmployee(emp);
+        return getEvaluationHistory(Number(employeeId), ctrl.signal);
+      })
+      .then(hist => {
+        if (ctrl.signal.aborted) return;
+        if (hist) {
+          setHistory(hist);
+        }
+      })
+      .catch((err) => {
+        if (ctrl.signal.aborted) return;
+        const status = err?.response?.status;
+
+        if (status === 403) {
+          setToast({
+            message: t('accessDeniedError'),
+            type: "error",
+          });
+        } else if (status === 404) {
+          setToast({
+            message: t('employeeNotFoundError'),
+            type: "error",
+          });
+        } else if (status >= 500) {
+          setToast({
+            message: t('serverError'),
+            type: "error",
+          });
+        } else {
+          setToast({
+            message: t('loadDataError'),
+            type: "error",
+          });
+        }
+      })
+      .finally(() => {
+        if (!ctrl.signal.aborted) setLoading(false);
+      });
+  };
 
   if (loading) return <LoadingSpinner />;
 
   return (
-    <>
-      <EvaluationHistory
-        history={history}
-        employeeName={employee?.name ?? ""}
-      />
+    <div style={{ animation: 'fadeIn 0.3s ease-in' }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: "1.5rem",
+          padding: "1rem",
+          backgroundColor: "var(--color-background)",
+          borderRadius: "8px",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "1rem",
+          }}
+        >
+          <button onClick={handleGoBack} className="btn btn-secondary">
+            ← {t('back')}
+          </button>
+          <h1 style={{ color: "var(--color-primary)", margin: 0, fontSize: "1.5rem" }}>
+            {employee ? `Histórico de ${employee.name}` : t('evaluationHistory')}
+          </h1>
+        </div>
+
+        <button onClick={handleRefresh} className="btn btn-secondary">
+          ↻ {t('refresh')}
+        </button>
+      </div>
+
+      {history.length === 0 ? (
+        <EmptyState message="Nenhuma avaliação registrada para este funcionário." />
+      ) : (
+        <EvaluationHistory
+          history={history}
+          employeeName={employee?.name ?? ""}
+        />
+      )}
+
       {toast && (
         <Toast
           message={toast.message}
@@ -67,6 +172,6 @@ export function History() {
           onClose={() => setToast(null)}
         />
       )}
-    </>
+    </div>
   );
 }

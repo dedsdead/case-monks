@@ -50,7 +50,7 @@ export function LeaderSelector() {
       }
       
       // Set the cookie for backend authentication
-      document.cookie = `employee_id=${employeeId}; path=/; domain=backend; max-age=86400; samesite=Lax; secure`;
+      document.cookie = `employee_id=${employeeId}; path=/; max-age=86400; samesite=Lax`;
       
       setEmployeeId(employeeId);
       setError(null);

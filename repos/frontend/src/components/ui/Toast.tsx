@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { createPortal } from "react-dom";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 interface ToastProps {
   message: string;
@@ -9,11 +10,14 @@ interface ToastProps {
 
 export function Toast({ message, type, onClose }: ToastProps) {
   const [visible, setVisible] = useState(true);
+  const { t } = useLanguage();
   const onCloseRef = useRef(onClose);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Keep onClose ref stable
-  onCloseRef.current = onClose;
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
 
   useEffect(() => {
     if (type === "success") {
@@ -67,7 +71,7 @@ export function Toast({ message, type, onClose }: ToastProps) {
               lineHeight: 1,
             }}
           >
-            Close
+            {t('close')}
           </button>
         )}
       </div>

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { Employee, Question } from "../../types";
+import { useLanguage } from "../../i18n/LanguageContext";
 import { ConfirmDialog } from "./ConfirmDialog";
 
 interface EvaluationFormProps {
@@ -17,6 +18,7 @@ export function EvaluationForm({
   isSubmitting = false,
   error,
 }: EvaluationFormProps) {
+  const { t } = useLanguage();
   const [scores, setScores] = useState<Record<number, number>>({});
   const [showConfirm, setShowConfirm] = useState(false);
 
@@ -53,7 +55,7 @@ export function EvaluationForm({
   return (
     <div>
       <h2 style={{ color: "var(--color-primary)", marginBottom: "0.25rem" }}>
-        Avaliar — {employee.name}
+        {t('evaluate')} — {employee.name}
       </h2>
       <p style={{ color: "var(--color-muted)", marginBottom: "1.5rem" }}>
         {employee.position_name}
@@ -75,10 +77,10 @@ export function EvaluationForm({
       )}
 
       <div style={{ marginBottom: "1rem", color: "var(--color-muted)", fontSize: "0.9rem" }}>
-        {scoredCount} de 6 questões respondidas
+        {scoredCount} {t('questionsAnswered')}
         {scoredCount > 0 && (
           <span style={{ marginLeft: "1rem", color: "var(--color-primary)", fontWeight: 600 }}>
-            Nota parcial: {weightedScore.toFixed(2)}
+            {t('partialScore')}: {weightedScore.toFixed(2)}
           </span>
         )}
       </div>
@@ -102,7 +104,7 @@ export function EvaluationForm({
                   {q.title}
                 </span>
                 <span style={{ color: "var(--color-muted)", fontSize: "0.85rem" }}>
-                  Peso: {q.weight}
+                  {t('weight')}: {q.weight}
                 </span>
               </div>
               <input
@@ -111,7 +113,7 @@ export function EvaluationForm({
                 max={4}
                 value={val !== undefined ? val : ""}
                 onChange={(e) => handleScoreChange(q.id, e.target.value)}
-                aria-label={`Nota para ${q.title}`}
+                aria-label={`${t('score')} ${q.title}`}
                 style={{
                   width: "80px",
                   padding: "0.5rem",
@@ -124,7 +126,7 @@ export function EvaluationForm({
               />
               {hasError && (
                 <p style={{ color: "#c0392b", fontSize: "0.8rem", marginTop: "0.25rem" }}>
-                  Pontuação deve ser entre 1 e 4
+                  {t('scoreRange')}
                 </p>
               )}
             </div>
@@ -149,7 +151,7 @@ export function EvaluationForm({
             fontWeight: 600,
           }}
         >
-          {isSubmitting ? "Enviando..." : "Enviar Avaliação"}
+          {isSubmitting ? `${t('evaluating')}...` : t('submitEvaluation')}
         </button>
       </div>
 
