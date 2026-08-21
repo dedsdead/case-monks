@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { EvaluationForm } from "./EvaluationForm";
+import { LanguageProvider } from "../../i18n/LanguageContext";
 import type { Employee, Question } from "../../types";
 
 const mockEmployee: Employee = {
@@ -20,16 +21,22 @@ const mockQuestions: Question[] = [
   { id: 6, title: "Visão Estratégica", weight: 10, order: 6 },
 ];
 
-describe("EvaluationForm", () => {
-  it("renders employee name and questions", () => {
-    render(
+function renderForm(onSubmit = vi.fn()) {
+  return render(
+    <LanguageProvider>
       <EvaluationForm
         employee={mockEmployee}
         questions={mockQuestions}
-        onSubmit={vi.fn()}
-      />,
-    );
-    expect(screen.getByText(/henry/i)).toBeInTheDocument();
+        onSubmit={onSubmit}
+      />
+    </LanguageProvider>,
+  );
+}
+
+describe("EvaluationForm", () => {
+  it("renders employee name and questions", () => {
+    renderForm();
+    expect(screen.getAllByText(/henry/i).length).toBeGreaterThan(0);
     expect(
       screen.getByText("Entrega de Resultados"),
     ).toBeInTheDocument();
@@ -37,37 +44,19 @@ describe("EvaluationForm", () => {
   });
 
   it("shows 0 de 6 questões respondidas initially", () => {
-    render(
-      <EvaluationForm
-        employee={mockEmployee}
-        questions={mockQuestions}
-        onSubmit={vi.fn()}
-      />,
-    );
+    renderForm();
     expect(screen.getByText(/0 de 6 questões respondidas/i)).toBeInTheDocument();
   });
 
   it("submit button is disabled initially", () => {
-    render(
-      <EvaluationForm
-        employee={mockEmployee}
-        questions={mockQuestions}
-        onSubmit={vi.fn()}
-      />,
-    );
+    renderForm();
     const btn = screen.getByRole("button", { name: /enviar avaliação/i });
     expect(btn).toBeDisabled();
   });
 
   it("enables submit after all 6 scores entered", async () => {
     const onSubmit = vi.fn();
-    render(
-      <EvaluationForm
-        employee={mockEmployee}
-        questions={mockQuestions}
-        onSubmit={onSubmit}
-      />,
-    );
+    renderForm(onSubmit);
     const user = userEvent.setup();
     const inputs = screen.getAllByRole("spinbutton");
     for (let i = 0; i < 6; i++) {
@@ -78,14 +67,26 @@ describe("EvaluationForm", () => {
     expect(btn).not.toBeDisabled();
   });
 
+  it("submits evaluation after confirmation when all scores are valid", async () => {
+    const onSubmit = vi.fn().mockResolvedValue(undefined);
+    renderForm(onSubmit);
+    const user = userEvent.setup();
+    const inputs = screen.getAllByRole("spinbutton");
+    for (let i = 0; i < 6; i++) {
+      await user.clear(inputs[i]);
+      await user.type(inputs[i], "3");
+    }
+    await user.click(screen.getByRole("button", { name: /enviar avaliação/i }));
+
+    // Confirmation dialog appears before actual submission
+    expect(screen.getByText(/confirmar envio da avaliação/i)).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Confirmar" }));
+    expect(onSubmit).toHaveBeenCalledTimes(1);
+  });
+
   it("shows real-time weighted score preview", async () => {
-    render(
-      <EvaluationForm
-        employee={mockEmployee}
-        questions={mockQuestions}
-        onSubmit={vi.fn()}
-      />,
-    );
+    renderForm();
     const user = userEvent.setup();
     const inputs = screen.getAllByRole("spinbutton");
     await user.clear(inputs[0]);
@@ -96,13 +97,7 @@ describe("EvaluationForm", () => {
   });
 
   it("validates score range 1-4", async () => {
-    render(
-      <EvaluationForm
-        employee={mockEmployee}
-        questions={mockQuestions}
-        onSubmit={vi.fn()}
-      />,
-    );
+    renderForm();
     const user = userEvent.setup();
     const inputs = screen.getAllByRole("spinbutton");
     await user.clear(inputs[0]);

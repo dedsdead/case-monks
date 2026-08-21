@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { AuthProvider } from "../../hooks/useAuth";
+import { LanguageProvider } from "../../i18n/LanguageContext";
 import { Layout } from "./Layout";
 
 vi.mock("../../services/api", () => ({
@@ -16,7 +17,9 @@ beforeEach(() => {
 function renderWithAuth(ui: React.ReactElement) {
   return render(
     <MemoryRouter>
-      <AuthProvider>{ui}</AuthProvider>
+      <LanguageProvider>
+        <AuthProvider>{ui}</AuthProvider>
+      </LanguageProvider>
     </MemoryRouter>,
   );
 }
@@ -34,14 +37,21 @@ describe("Layout", () => {
   it("shows header with app title when authenticated", () => {
     localStorage.setItem("employee_id", "1");
     renderWithAuth(<Layout />);
-    expect(screen.getByText("Avaliação de Liderados")).toBeInTheDocument();
+    expect(screen.getByText("Avaliações")).toBeInTheDocument();
   });
 
-  it("shows Trocar identidade button when authenticated", () => {
+  it("shows identity switcher button when authenticated", () => {
     localStorage.setItem("employee_id", "1");
     renderWithAuth(<Layout />);
     expect(
-      screen.getByRole("button", { name: /trocar identidade/i }),
+      screen.getByRole("button", { name: /selecionar identidade/i }),
     ).toBeInTheDocument();
+  });
+
+  it("renders navigation links to home and history", () => {
+    localStorage.setItem("employee_id", "1");
+    renderWithAuth(<Layout />);
+    expect(screen.getByRole("link", { name: "Início" })).toHaveAttribute("href", "/");
+    expect(screen.getByRole("link", { name: "Histórico de Avaliações" })).toHaveAttribute("href", "/history");
   });
 });

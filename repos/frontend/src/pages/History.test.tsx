@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { AuthProvider } from "../hooks/useAuth";
+import { LanguageProvider } from "../i18n/LanguageContext";
 import { History } from "./History";
 import * as api from "../services/api";
 
@@ -15,11 +16,13 @@ beforeEach(() => {
 function renderHistory(employeeId = "8") {
   return render(
     <MemoryRouter initialEntries={[`/history/${employeeId}`]}>
-      <AuthProvider>
-        <Routes>
-          <Route path="/history/:employeeId" element={<History />} />
-        </Routes>
-      </AuthProvider>
+      <LanguageProvider>
+        <AuthProvider>
+          <Routes>
+            <Route path="/history/:employeeId" element={<History />} />
+          </Routes>
+        </AuthProvider>
+      </LanguageProvider>
     </MemoryRouter>,
   );
 }

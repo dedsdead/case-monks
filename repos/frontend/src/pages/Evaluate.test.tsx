@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { AuthProvider } from "../hooks/useAuth";
+import { LanguageProvider } from "../i18n/LanguageContext";
 import { Evaluate } from "./Evaluate";
 import * as api from "../services/api";
 
@@ -15,11 +16,13 @@ beforeEach(() => {
 function renderEvaluate(employeeId = "8") {
   return render(
     <MemoryRouter initialEntries={[`/evaluate/${employeeId}`]}>
-      <AuthProvider>
-        <Routes>
-          <Route path="/evaluate/:employeeId" element={<Evaluate />} />
-        </Routes>
-      </AuthProvider>
+      <LanguageProvider>
+        <AuthProvider>
+          <Routes>
+            <Route path="/evaluate/:employeeId" element={<Evaluate />} />
+          </Routes>
+        </AuthProvider>
+      </LanguageProvider>
     </MemoryRouter>,
   );
 }
@@ -50,7 +53,7 @@ describe("Evaluate page", () => {
     renderEvaluate();
 
     await waitFor(() => {
-      expect(screen.getByText(/henry/i)).toBeInTheDocument();
+      expect(screen.getAllByText(/henry/i).length).toBeGreaterThan(0);
     });
     expect(screen.getByText("Entrega de Resultados")).toBeInTheDocument();
   });

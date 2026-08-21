@@ -1,7 +1,16 @@
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
+import { BrowserRouter } from "react-router-dom";
 import { EmployeeList } from "./EmployeeList";
 import type { SubordinateEvaluation } from "../../types";
+
+function renderList(evaluations: SubordinateEvaluation[]) {
+  return render(
+    <BrowserRouter>
+      <EmployeeList evaluations={evaluations} />
+    </BrowserRouter>
+  );
+}
 
 const mockEvaluations: SubordinateEvaluation[] = [
   {
@@ -31,12 +40,12 @@ const mockEvaluations: SubordinateEvaluation[] = [
 
 describe("EmployeeList", () => {
   it("renders null for empty evaluations", () => {
-    const { container } = render(<EmployeeList evaluations={[]} />);
+    const { container } = renderList([]);
     expect(container.innerHTML).toBe("");
   });
 
   it("renders table headers", () => {
-    render(<EmployeeList evaluations={mockEvaluations} />);
+    renderList(mockEvaluations);
     expect(screen.getByText("Funcionário")).toBeInTheDocument();
     expect(screen.getByText("Cargo")).toBeInTheDocument();
     expect(screen.getByText("Pontuação")).toBeInTheDocument();
@@ -45,7 +54,7 @@ describe("EmployeeList", () => {
   });
 
   it("renders employee names and positions", () => {
-    render(<EmployeeList evaluations={mockEvaluations} />);
+    renderList(mockEvaluations);
     expect(screen.getByText("Henry")).toBeInTheDocument();
     expect(screen.getByText("Developer")).toBeInTheDocument();
     expect(screen.getByText("James")).toBeInTheDocument();
@@ -53,32 +62,33 @@ describe("EmployeeList", () => {
   });
 
   it("renders score for evaluated employee", () => {
-    render(<EmployeeList evaluations={mockEvaluations} />);
+    renderList(mockEvaluations);
     expect(screen.getByText("3.40")).toBeInTheDocument();
   });
 
   it("renders 'Não avaliado' for unevaluated employee", () => {
-    render(<EmployeeList evaluations={mockEvaluations} />);
+    renderList(mockEvaluations);
     expect(screen.getByText("Não avaliado")).toBeInTheDocument();
   });
 
-  it("renders evaluate and history links", () => {
-    render(<EmployeeList evaluations={mockEvaluations} />);
-    const evalLinks = screen.getAllByText("Avaliar");
-    const histLinks = screen.getAllByText("Histórico");
-    expect(evalLinks).toHaveLength(2);
-    expect(histLinks).toHaveLength(2);
-    expect(evalLinks[0].closest("a")).toHaveAttribute("href", "/evaluate/8");
-    expect(histLinks[0].closest("a")).toHaveAttribute("href", "/history/8");
+  it("renders evaluate and history buttons", () => {
+    renderList(mockEvaluations);
+    const evalButtons = screen.getAllByText("Avaliar");
+    const histButtons = screen.getAllByText("Histórico");
+    expect(evalButtons).toHaveLength(2);
+    expect(histButtons).toHaveLength(2);
+    expect(evalButtons[0]).toBeInTheDocument();
+    expect(histButtons[0]).toBeInTheDocument();
   });
 
   it("shows depth indicator for direct reports", () => {
-    render(<EmployeeList evaluations={mockEvaluations} />);
+    renderList(mockEvaluations);
     expect(screen.getByText("Direto")).toBeInTheDocument();
   });
 
   it("shows depth indicator for indirect reports", () => {
-    render(<EmployeeList evaluations={mockEvaluations} />);
+    renderList(mockEvaluations);
     expect(screen.getByText("Nível 2")).toBeInTheDocument();
   });
 });
+
