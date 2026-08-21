@@ -24,15 +24,15 @@ def get_employee_id_from_cookie(employee_id: str | None = Cookie(default=None)) 
     """Extract employee_id from cookie; raise 401 if missing."""
     if employee_id is None:
         raise HTTPException(status_code=401, detail="Employee ID cookie not found")
-    
+
     # Validate employee_id format (must be positive integer)
     if not re.match(r'^\d+$', employee_id):
         raise HTTPException(status_code=401, detail="Invalid employee ID format")
-    
+
     employee_num = int(employee_id)
     if employee_num <= 0:
         raise HTTPException(status_code=401, detail="Invalid employee ID")
-    
+
     return employee_id
 
 
@@ -61,6 +61,6 @@ def validate_hierarchy_access(
     from app.services.hierarchy import is_ancestor_of
     
     try:
-        return is_ancestor_of(current_employee.id, target_employee_id, db)
+        return is_ancestor_of(db, current_employee.id, target_employee_id)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Hierarchy validation failed: {str(e)}")

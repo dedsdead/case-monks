@@ -20,18 +20,6 @@ class Employee(Base):
     position_name: Mapped[str] = mapped_column(String(100), nullable=False)
 
     __table_args__ = (
-        CheckConstraint(
-            "name ~ '^[A-Za-zÀ-ÿ\s\-''\.]+$'", 
-            name="chk_name_format"
-        ),
-        CheckConstraint(
-            "email ~ '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'", 
-            name="chk_email_format"
-        ),
-        CheckConstraint(
-            "position_name ~ '^[A-Za-zÀ-ÿ\s0-9\-''\.]+$'", 
-            name="chk_position_format"
-        ),
         Index("ix_employee_email", "email"),
     )
 
@@ -46,5 +34,6 @@ class LeaderLead(Base):
 
     __table_args__ = (
         CheckConstraint("leader_id <> lead_id", name="chk_no_self_lead"),
-        Index("ix_leader_lead_reverse", "lead_id"),
+        Index("ix_leader_lead_leader", "leader_id"),
+        Index("ix_leader_lead_lead", "lead_id"),
     )

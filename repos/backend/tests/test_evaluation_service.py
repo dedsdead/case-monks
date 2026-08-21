@@ -14,7 +14,7 @@ from app.services.evaluation import (
     get_evaluation_history,
     get_subordinate_evaluations,
 )
-from app.services.hierarchy import clear_cache
+# from app.services.hierarchy import clear_cache  # Not needed
 
 
 @pytest.fixture
@@ -45,9 +45,9 @@ def seed_evaluation_data(db_session):
     ]
     db_session.add_all(questions)
     db_session.commit()
-    clear_cache()
+    # clear_cache()  # Not needed
     yield
-    clear_cache()
+    # clear_cache()  # Not needed
 
 
 class TestCreateEvaluation:

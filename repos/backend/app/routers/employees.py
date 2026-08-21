@@ -20,7 +20,7 @@ def list_employees(db: Session = Depends(get_db)):
     return db.query(Employee).order_by(Employee.id).all()
 
 
-@router.get("/{emp_id}", response_model=EmployeeResponse)
+@router.get("/{emp_id}/", response_model=EmployeeResponse)
 def get_employee(emp_id: int, db: Session = Depends(get_db)):
     """Return employee by ID."""
     employee = db.query(Employee).filter(Employee.id == emp_id).first()
@@ -29,7 +29,7 @@ def get_employee(emp_id: int, db: Session = Depends(get_db)):
     return employee
 
 
-@router.get("/{emp_id}/subordinates", response_model=list[EmployeeResponse])
+@router.get("/{emp_id}/subordinates/", response_model=list[EmployeeResponse])
 def list_subordinates(
     emp_id: int,
     current: Annotated[Employee, Depends(get_current_employee)],

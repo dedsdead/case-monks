@@ -8,7 +8,7 @@ from pathlib import Path
 
 def setup_database():
     """Create database tables manually"""
-    db_path = Path("/app/data/casetecnico.db")
+    db_path = Path("./data/casetecnico.db")
     
     # Remove existing database if it exists
     if db_path.exists():
