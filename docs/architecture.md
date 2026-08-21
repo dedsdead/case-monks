@@ -74,6 +74,7 @@ backend/
 │   │   ├── evaluation_response.py
 │   │   └── evaluation_summary.py
 │   ├── routers/             # API endpoints
+│   │   ├── health.py         # Health check and debugging
 │   │   ├── employees.py
 │   │   └── evaluations.py
 │   ├── services/            # Business logic
@@ -92,10 +93,13 @@ backend/
 ```
 frontend/
 ├── src/
-│   ├── main.tsx                 # App entrypoint (wraps in AuthProvider + ErrorBoundary)
+│   ├── main.tsx                 # App entrypoint (wraps in LanguageProvider + AuthProvider + ErrorBoundary)
 │   ├── App.tsx                  # React Router setup
 │   ├── index.css                # CSS custom properties (color palette)
 │   ├── test-setup.ts            # Vitest global test setup (jsdom, testing-library)
+│   ├── i18n/                    # Internationalization (PT-BR / EN)
+│   │   ├── LanguageContext.tsx   # LanguageProvider + useLanguage hook
+│   │   └── translations.ts      # Translation strings for PT-BR and EN
 │   ├── pages/                   # Page components
 │   │   ├── Home.tsx             # Home page with subordinate evaluations
 │   │   ├── Evaluate.tsx         # Evaluation form page (Phase 5)
@@ -103,8 +107,9 @@ frontend/
 │   │   └── NotFound.tsx         # 404 page with home link
 │   ├── components/
 │   │   ├── layout/              # App shell components
-│   │   │   ├── Layout.tsx       # App shell: header + Outlet
-│   │   │   └── LeaderSelector.tsx  # Identity selection dropdown
+│   │   │   ├── Layout.tsx       # App shell: header + Outlet (uses useLanguage for translations)
+│   │   │   ├── LeaderSelector.tsx  # Identity selection dropdown
+│   │   │   └── LanguageSwitcher.tsx  # PT/EN language toggle buttons
 │   │   ├── employee/            # Employee-related components
 │   │   │   └── EmployeeList.tsx # Subordinate table with action buttons
 │   │   ├── evaluation/          # Evaluation form components (Phase 5)
@@ -183,6 +188,27 @@ frontend/
 1. **Authentication:** Cookie-based (employee_id)
 2. **Authorization:** Backend validates hierarchy on every request
 3. **SQL Injection:** All queries parameterized via SQLAlchemy
+
+### Cookie Configuration Invariants
+1. **Local Development:** Never use `domain=backend` parameter in cookies
+2. **Debug Access:** `/api/test-cookies` endpoint available for cookie inspection
+3. **Health Check:** `/api/health` endpoint unauthenticated for service monitoring
+4. **Identity Change:** Automatic redirection on cookie/localStorage changes
+5. **Error Handling:** Comprehensive error messages for authentication failures
+
+### Error Handling Invariants
+1. **Input Validation:** All inputs validated before processing (employee IDs, scores, question IDs)
+2. **Sanitization:** User input sanitized to prevent security issues
+3. **Graceful Degradation:** Individual processing failures don't break entire operations
+4. **Request Cancellation:** AbortController used to cancel stale requests
+5. **Detailed Logging:** All errors logged with traceback information for debugging
+
+### Frontend Error Handling Patterns
+1. **Separated Fetch Operations:** Employee data fetched separately from evaluation/history data
+2. **Status Code Handling:** Specific error messages for different HTTP status codes
+3. **Automatic Redirection:** Users redirected to appropriate pages on errors
+4. **User Feedback:** Toast notifications for success/error states
+5. **Loading States:** Proper loading indicators during API calls
 
 ## Safe Change Guidance
 

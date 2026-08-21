@@ -4,6 +4,8 @@
 
 | Feature | Status | Documentation |
 |---------|--------|---------------|
+| Authentication Debugging | ✅ Implemented | [authentication-debugging.md](./authentication-debugging.md) |
+| Error Handling & Debugging | ✅ Implemented | [../solutions/patterns/evaluation-platform-error-handling-guide.md](../solutions/patterns/evaluation-platform-error-handling-guide.md) |
 | _[Feature]_ | _[status]_ | _[link]_ |
 
 ## Feature Documentation Guidelines
