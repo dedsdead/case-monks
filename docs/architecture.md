@@ -47,6 +47,8 @@ Plataforma web para avaliação de liderados seguindo hierarquia organizacional.
 | Frontend | React | 18.x | UI framework |
 | Frontend | TypeScript | 5.x | Type safety |
 | Frontend | Vite | 5.x | Build tool + dev server |
+| Frontend | Vitest | 3.x | Unit/integration testing |
+| Frontend | React Testing Library | 16.x | Component testing utilities |
 | Frontend | Axios | 1.x | HTTP client |
 | Backend | Python | 3.10+ | Runtime |
 | Backend | FastAPI | 0.110+ | Web framework |
@@ -72,6 +74,7 @@ backend/
 │   │   ├── evaluation_response.py
 │   │   └── evaluation_summary.py
 │   ├── routers/             # API endpoints
+│   │   ├── health.py         # Health check and debugging
 │   │   ├── employees.py
 │   │   └── evaluations.py
 │   ├── services/            # Business logic
@@ -90,25 +93,44 @@ backend/
 ```
 frontend/
 ├── src/
-│   ├── main.tsx             # App entrypoint
-│   ├── App.tsx              # Router setup
-│   ├── pages/               # Page components
-│   │   ├── Home.tsx
-│   │   ├── Evaluate.tsx
-│   │   └── History.tsx
-│   ├── components/          # Reusable components
-│   │   ├── LeaderSelector.tsx
-│   │   ├── EmployeeList.tsx
-│   │   ├── EvaluationForm.tsx
-│   │   └── EvaluationHistory.tsx
-│   ├── services/            # API calls
-│   │   └── api.ts
-│   ├── types/               # TypeScript types
-│   │   └── index.ts
-│   └── hooks/               # Custom hooks
-│       └── useAuth.ts
+│   ├── main.tsx                 # App entrypoint (wraps in LanguageProvider + AuthProvider + ErrorBoundary)
+│   ├── App.tsx                  # React Router setup
+│   ├── index.css                # CSS custom properties (color palette)
+│   ├── test-setup.ts            # Vitest global test setup (jsdom, testing-library)
+│   ├── i18n/                    # Internationalization (PT-BR / EN)
+│   │   ├── LanguageContext.tsx   # LanguageProvider + useLanguage hook
+│   │   └── translations.ts      # Translation strings for PT-BR and EN
+│   ├── pages/                   # Page components
+│   │   ├── Home.tsx             # Home page with subordinate evaluations
+│   │   ├── Evaluate.tsx         # Evaluation form page (Phase 5)
+│   │   ├── History.tsx          # Evaluation history page (Phase 5)
+│   │   └── NotFound.tsx         # 404 page with home link
+│   ├── components/
+│   │   ├── layout/              # App shell components
+│   │   │   ├── Layout.tsx       # App shell: header + Outlet (uses useLanguage for translations)
+│   │   │   ├── LeaderSelector.tsx  # Identity selection dropdown
+│   │   │   └── LanguageSwitcher.tsx  # PT/EN language toggle buttons
+│   │   ├── employee/            # Employee-related components
+│   │   │   └── EmployeeList.tsx # Subordinate table with action buttons
+│   │   ├── evaluation/          # Evaluation form components (Phase 5)
+│   │   │   ├── EvaluationForm.tsx
+│   │   │   └── ConfirmDialog.tsx
+│   │   ├── history/             # History components (Phase 5)
+│   │   │   ├── EvaluationHistory.tsx
+│   │   │   └── EvaluationDetail.tsx
+│   │   └── ui/                  # Shared UI primitives
+│   │       ├── LoadingSpinner.tsx
+│   │       ├── EmptyState.tsx
+│   │       └── ErrorBoundary.tsx
+│   ├── services/                # API calls
+│   │   └── api.ts               # Axios instance with cookie auth interceptor
+│   ├── types/                   # TypeScript types
+│   │   └── index.ts             # Interfaces matching backend schemas
+│   └── hooks/                   # Custom hooks
+│       └── useAuth.tsx          # Auth context (AuthProvider + useAuth)
 ├── package.json
-├── vite.config.ts
+├── vite.config.ts               # Vite config with /api proxy + Vitest config
+├── tsconfig.app.json            # TypeScript config (excludes test files)
 └── Dockerfile
 ```
 
@@ -118,7 +140,7 @@ frontend/
 
 ```
 1. Leader selects employee from dropdown
-2. Frontend sends GET /api/employees/subordinates
+2. Frontend sends GET /api/evaluations/subordinates
 3. Backend queries hierarchy using CTE
 4. Frontend displays list of subordinates
 5. Leader clicks "Evaluate" on employee
@@ -166,6 +188,27 @@ frontend/
 1. **Authentication:** Cookie-based (employee_id)
 2. **Authorization:** Backend validates hierarchy on every request
 3. **SQL Injection:** All queries parameterized via SQLAlchemy
+
+### Cookie Configuration Invariants
+1. **Local Development:** Never use `domain=backend` parameter in cookies
+2. **Debug Access:** `/api/test-cookies` endpoint available for cookie inspection
+3. **Health Check:** `/api/health` endpoint unauthenticated for service monitoring
+4. **Identity Change:** Automatic redirection on cookie/localStorage changes
+5. **Error Handling:** Comprehensive error messages for authentication failures
+
+### Error Handling Invariants
+1. **Input Validation:** All inputs validated before processing (employee IDs, scores, question IDs)
+2. **Sanitization:** User input sanitized to prevent security issues
+3. **Graceful Degradation:** Individual processing failures don't break entire operations
+4. **Request Cancellation:** AbortController used to cancel stale requests
+5. **Detailed Logging:** All errors logged with traceback information for debugging
+
+### Frontend Error Handling Patterns
+1. **Separated Fetch Operations:** Employee data fetched separately from evaluation/history data
+2. **Status Code Handling:** Specific error messages for different HTTP status codes
+3. **Automatic Redirection:** Users redirected to appropriate pages on errors
+4. **User Feedback:** Toast notifications for success/error states
+5. **Loading States:** Proper loading indicators during API calls
 
 ## Safe Change Guidance
 

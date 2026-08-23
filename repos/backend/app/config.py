@@ -22,11 +22,16 @@ class Settings(BaseSettings):
     # Debug
     DEBUG: bool = False
 
-    # CORS
+    # CORS - Explicit origins only, never "*" when credentials are allowed
     CORS_ORIGINS: list[str] = [
         "http://localhost:3000",
         "http://localhost:5173",
     ]
+    
+    # Security
+    MAX_REQUEST_SIZE: int = 10 * 1024 * 1024  # 10MB
+    RATE_LIMIT_REQUESTS: int = 100
+    RATE_LIMIT_WINDOW: int = 60  # seconds
 
 
 settings = Settings()

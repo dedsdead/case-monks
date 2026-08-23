@@ -518,6 +518,47 @@ Entry: Leader clicks "View History" for a subordinate
 **Roles:** Leader
 **Priority:** Must-have
 
+#### AC-27: Identity change with in-flight requests
+
+**Given** I have submitted an evaluation and the request is in flight
+**When** I change my identity via the leader selector dropdown
+**Then** the in-flight request is cancelled and the application state updates for the new identity
+
+**Roles:** Leader
+**Priority:** Must-have
+
+#### AC-28: Invalid employee ID handling
+
+**Given** I have an invalid employee ID in localStorage or cookies
+**When** the application loads
+**Then** I see an appropriate error message and am prompted to re-select my identity
+
+**Roles:** Any user
+**Priority:** Must-have
+
+#### AC-29: Backend error handling with detailed feedback
+
+**Given** the backend encounters an error during evaluation submission
+**When** the error occurs
+**Then** I receive a specific error message based on the error type:
+- 403: "Você não tem acesso para avaliar este funcionário"
+- 404: "Funcionário não encontrado"
+- 409: "Você já avaliou esta semana"
+- 422: "É necessário avaliar todas as 6 perguntas"
+- 500: "Erro de servidor. Tente novamente mais tarde."
+
+**Roles:** Leader
+**Priority:** Must-have
+
+#### AC-26: Double-click submission protection
+
+**Given** I have clicked "Confirmar" on the submission dialog
+**When** the POST request is in flight and I click submit again
+**Then** the button is disabled during the request (loading state), preventing duplicate submissions
+
+**Roles:** Leader
+**Priority:** Must-have
+
 ### Viewing Evaluations
 
 #### AC-27: Leader sees subordinate evaluations overview
@@ -773,7 +814,7 @@ Entry: Leader clicks "View History" for a subordinate
 
 **Add to Phase 4 (Frontend - Evaluation Form):**
 
-4. **Implement localStorage draft save for evaluation form** (`frontend/src/components/EvaluationForm.tsx`, `frontend/src/hooks/useEvaluationDraft.ts`):
+4. **Implement localStorage draft save for evaluation form** (`frontend/src/components/evaluation/EvaluationForm.tsx`, `frontend/src/hooks/useEvaluationDraft.ts`):
    - Create `useEvaluationDraft` hook that auto-saves form state to localStorage keyed by `{leaderId}-{employeeId}`
    - On form mount: check for existing draft and restore scores
    - On successful submit: clear draft from localStorage
@@ -783,7 +824,7 @@ Entry: Leader clicks "View History" for a subordinate
 
 **Add to Phase 4 (Frontend - Evaluation Form):**
 
-4. **Add confirmation dialog before evaluation submission** (`frontend/src/components/EvaluationForm.tsx`, `frontend/src/components/ConfirmDialog.tsx`):
+4. **Add confirmation dialog before evaluation submission** (`frontend/src/components/evaluation/EvaluationForm.tsx`, `frontend/src/components/evaluation/ConfirmDialog.tsx`):
    - Create `ConfirmDialog` component with message "Confirmar envio da avaliacao? Esta acao nao pode ser desfeita."
    - Wire to submit button: show dialog before POST request
    - Two buttons: "Confirmar" (proceed) and "Cancelar" (dismiss)
@@ -792,7 +833,7 @@ Entry: Leader clicks "View History" for a subordinate
 
 **Add to Phase 4 (Frontend - Components):**
 
-4. **Add loading states and skeleton UI components** (`frontend/src/components/LoadingSpinner.tsx`, `frontend/src/components/SkeletonList.tsx`):
+4. **Add loading states and skeleton UI components** (`frontend/src/components/ui/LoadingSpinner.tsx`, `frontend/src/components/ui/SkeletonList.tsx`):
    - Create `LoadingSpinner` component
    - Create `SkeletonList` component for subordinate list placeholder
    - Wrap API calls in subordinate list, evaluation form, and history view with loading state
@@ -801,7 +842,7 @@ Entry: Leader clicks "View History" for a subordinate
 
 **Add to Phase 4 (Frontend - App Structure):**
 
-4. **Add React ErrorBoundary** (`frontend/src/components/ErrorBoundary.tsx`, `frontend/src/App.tsx`):
+4. **Add React ErrorBoundary** (`frontend/src/components/ui/ErrorBoundary.tsx`, `frontend/src/App.tsx`):
    - Create `ErrorBoundary` class component with fallback UI
    - Wrap main route content in ErrorBoundary
    - Fallback shows "Algo deu errado" with retry button
@@ -860,7 +901,7 @@ Entry: Leader clicks "View History" for a subordinate
 
 **Add to Phase 4 (Frontend - Styles):**
 
-4. **Implement responsive layout** (`frontend/src/styles/`, all page components):
+4. **Implement responsive layout** (`frontend/src/index.css`, all page components):
    - Add CSS breakpoints: mobile (<768px), tablet (768-1024px), desktop (>1024px)
    - Stack form columns vertically on mobile
    - Ensure minimum 44px touch targets for buttons and inputs
@@ -890,7 +931,7 @@ Entry: Leader clicks "View History" for a subordinate
 
 **Add to Phase 4 (Frontend - Components):**
 
-4. **Add per-question evaluation detail breakdown** (`frontend/src/components/EvaluationDetail.tsx`):
+4. **Add per-question evaluation detail breakdown** (`frontend/src/components/history/EvaluationDetail.tsx`):
    - Create expandable row component in EvaluationHistory
    - On expand: show table with question title, weight, score, weighted contribution
    - Calculate contribution: `(score x weight) / 100`
@@ -910,7 +951,7 @@ Entry: Leader clicks "View History" for a subordinate
 **Add to Phase 3 (Backend - Routes):**
 
 3. **Add health check endpoint** (`backend/app/routes/health.py`, `backend/app/main.py`):
-   - Create `GET /api/health` returning `{ "status": "ok", "version": "1.0.0" }`
+   - Create `GET /api/health` returning `{ "status": "ok" }`
    - Register router in main.py
    - Use in Docker Compose `healthcheck` configuration
 
@@ -918,7 +959,7 @@ Entry: Leader clicks "View History" for a subordinate
 
 **Add to Phase 4 (Frontend - Auth):**
 
-4. **Implement cross-tab identity sync** (`frontend/src/hooks/useAuth.ts`):
+4. **Implement cross-tab identity sync** (`frontend/src/hooks/useAuth.tsx`):
    - Use localStorage with `storage` event listener
    - When another tab changes `employee_id`, re-fetch data in current tab
    - Use `AbortController` to cancel stale requests on identity change
@@ -927,7 +968,7 @@ Entry: Leader clicks "View History" for a subordinate
 
 **Add to Phase 4 (Frontend - API):**
 
-4. **Implement request cancellation on leader switch** (`frontend/src/services/api.ts`, `frontend/src/hooks/useAuth.ts`):
+4. **Implement request cancellation on leader switch** (`frontend/src/services/api.ts`, `frontend/src/hooks/useAuth.tsx`):
    - Maintain an `AbortController` per API service
    - On leader switch: abort all in-flight requests, create new controller
    - Pass signal to Axios requests
@@ -1018,3 +1059,124 @@ The project provides an SQL dump with `employee` (id, name, email, position_name
 - CTE queries must join through `leader_lead` table
 - Frontend TypeScript types must use `name` (string) instead of `first_name`/`last_name`
 - API response schemas must be updated accordingly
+
+## Appendix E: Critical Error Handling Invariants (Post-Debugging)
+
+### Authentication and Cookie Handling Invariants
+
+1. **Cookie Domain Configuration**: Never use `domain=backend` parameter in cookies for local development
+   - **Rationale**: This causes authentication issues and "em implementação..." placeholders
+   - **Implementation**: Use environment-aware secure flag:
+     ```typescript
+     const isProduction = import.meta.env.PROD;
+     document.cookie = `employee_id=${id}; path=/; max-age=86400; samesite=Lax; secure=${isProduction}`;
+     ```
+
+2. **Identity Change Redirection**: Always redirect to home page when identity changes
+   - **Rationale**: Prevents inconsistent state and ensures proper data loading
+   - **Implementation**: Call `window.location.href = "/"` after setting new identity
+
+3. **Input Validation**: Validate all employee IDs before setting them
+   - **Rationale**: Prevents invalid state and potential security issues
+   - **Implementation**: Check `typeof id === 'number' && id > 0` before setting
+
+### Backend Error Handling Invariants
+
+1. **Input Sanitization**: Always sanitize user input to prevent security issues
+   - **Rationale**: Prevents injection attacks and malformed data
+   - **Implementation**: Use `re.sub(r'[<>"\'\\;&|]', '', value)` to remove dangerous characters
+
+2. **Graceful Degradation**: Individual processing failures should not break entire operations
+   - **Rationale**: Ensures partial data is still returned when some items fail
+   - **Implementation**: Use try/catch blocks around individual processing and continue with others
+
+3. **Detailed Error Logging**: Always log full error information for debugging
+   - **Rationale**: Essential for troubleshooting production issues
+   - **Implementation**: Use `traceback.format_exc()` to capture full error details
+
+### Frontend Error Handling Invariants
+
+1. **Separated Data Fetching**: Fetch employee data separately from evaluation/history data
+   - **Rationale**: Prevents cascading failures and improves error handling
+   - **Implementation**: Use sequential API calls instead of Promise.all
+
+2. **Request Cancellation**: Use AbortController to cancel stale requests
+   - **Rationale**: Prevents race conditions and inconsistent state
+   - **Implementation**: Create AbortController for each useEffect and cancel on cleanup
+
+3. **Specific Error Messages**: Handle different HTTP status codes with appropriate messages
+   - **Rationale**: Provides clear feedback to users and helps with debugging
+   - **Implementation**: Check `err?.response?.status` and show specific messages for 403, 404, 500, etc.
+
+### Performance and Reliability Invariants
+
+1. **Loading States**: Always show loading indicators during API calls
+   - **Rationale**: Improves user experience and prevents confusion
+   - **Implementation**: Use loading state variables and spinner components
+
+2. **Error Boundaries**: Implement React Error Boundaries for critical components
+   - **Rationale**: Prevents entire app crashes from component errors
+   - **Implementation**: Wrap routes in ErrorBoundary components with fallback UI
+
+3. **Memory Management**: Clean up timers and event listeners properly
+   - **Rationale**: Prevents memory leaks and ensures proper cleanup
+   - **Implementation**: Use useEffect cleanup functions and clearTimeout for timers
+
+## Appendix F: Debugging Workflow (Post-Debugging)
+
+### Step-by-Step Authentication Debugging
+
+1. **Check Service Health**
+   ```bash
+   curl http://localhost:8000/api/health
+   # Expected: {"status": "ok"}
+   ```
+
+2. **Verify Cookie Configuration**
+   - Open browser DevTools > Application > Storage > Cookies
+   - Verify `employee_id` cookie exists without `domain=backend` parameter
+   - Check localStorage for `employee_id` value
+
+3. **Test Identity Change Flow**
+   - Select different leader in frontend
+   - Verify automatic redirection to home page
+   - Confirm new data loads correctly
+
+4. **Check Error Handling**
+   - Clear browser cookies and refresh
+   - Verify error message appears
+   - Test automatic redirection to leader selector
+
+### Step-by-Step Backend Error Debugging
+
+1. **Check Input Validation**
+   - Test endpoints with invalid parameters
+   - Verify appropriate error responses
+   - Check sanitization works correctly
+
+2. **Verify Error Logging**
+   - Check backend logs for detailed error information
+   - Verify tracebacks are captured for debugging
+   - Monitor error rates and patterns
+
+3. **Test Graceful Degradation**
+   - Simulate individual processing failures
+   - Verify partial data is still returned
+   - Check error messages are user-friendly
+
+### Step-by-Step Frontend Error Debugging
+
+1. **Check Request Cancellation**
+   - Trigger multiple rapid requests
+   - Verify stale requests are cancelled
+   - Confirm state is consistent
+
+2. **Test Error Scenarios**
+   - Simulate network failures
+   - Verify appropriate error messages
+   - Check automatic redirection works
+
+3. **Verify Loading States**
+   - Test slow network conditions
+   - Confirm loading indicators appear
+   - Verify state transitions are smooth

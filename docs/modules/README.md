@@ -4,6 +4,7 @@
 
 | Module | Purpose | Documentation |
 |--------|---------|---------------|
+| Backend | Main backend with API and business logic | [backend.md](./backend.md) |
 | _[Module]_ | _[description]_ | _[link]_ |
 
 ## Module Documentation Guidelines

@@ -219,3 +219,14 @@ __marimo__/
 
 # AI configuration files
 .opencode
+
+# Local SQLite dev database artifacts
+repos/backend/data/*.db
+repos/backend/data/*.db-shm
+repos/backend/data/*.db-wal
+
+# Local SQLite dev database artifacts
+repos/backend/data/*.db
+repos/backend/data/*.db-shm
+repos/backend/data/*.db-wal
+db_dump.txt

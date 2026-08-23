@@ -61,6 +61,11 @@ uvicorn app.main:app --reload --port 8000
 cd frontend
 npm install
 npm run dev
+
+# Frontend tests
+cd frontend
+npm test              # Run all tests (watch mode)
+npm run test:run      # Run all tests (single run, CI mode)
 ```
 
 ### Docker Compose
@@ -83,6 +88,33 @@ docker-compose up --build
 | Database | Host filesystem | Volume |
 | Network | localhost | Docker network |
 | Ports | Explicit mapping | Explicit mapping |
+
+### Debug Endpoints
+
+#### Local Development
+- **Health Check:** `http://localhost:8000/api/health`
+- **Cookie Debug:** `http://localhost:8000/api/test-cookies`
+
+#### Docker
+- **Health Check:** `http://localhost:8000/api/health`
+- **Cookie Debug:** `http://localhost:8000/api/test-cookies`
+
+### Common Development Issues
+
+#### Cookie Authentication
+- **Issue:** Frontend shows "em implementação..." instead of content
+- **Fix:** Ensure no `domain=backend` parameter in cookie (local development)
+- **Debug:** Use `/api/test-cookies` endpoint to verify cookie transmission
+
+#### Database Seeding
+- **Issue:** No data in database, backend errors
+- **Fix:** Restart backend service to trigger automatic seeding
+- **Verify:** Check `repos/backend/data/casetecnico.db` exists
+
+#### Service Dependencies
+- **Issue:** Frontend works but backend endpoints fail
+- **Fix:** Ensure backend is running before starting frontend
+- **Order:** Backend → Database seeding → Frontend
 
 ## Operational Access
 
