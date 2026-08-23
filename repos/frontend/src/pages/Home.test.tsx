@@ -1,19 +1,24 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter, Outlet } from 'react-router-dom';
 import { Home } from './Home';
 import { AuthProvider } from '../hooks/useAuth';
 import { LanguageProvider } from '../i18n/LanguageContext';
+import { Layout } from '../components/layout/Layout';
 import * as api from '../services/api';
 
 vi.mock('../services/api');
 
+// Helper component to render Home within Layout
 function renderHome() {
   return render(
     <BrowserRouter>
       <LanguageProvider>
         <AuthProvider>
+          <Layout>
+            <Outlet />
+          </Layout>
           <Home />
         </AuthProvider>
       </LanguageProvider>
@@ -22,6 +27,12 @@ function renderHome() {
 }
 
 describe('Home Page', () => {
+  // Mock employees for LeaderSelector
+  const mockEmployees = [
+    { id: 1, name: 'Alice', email: 'alice@test.com', position_name: 'CEO' },
+    { id: 2, name: 'Bob', email: 'bob@test.com', position_name: 'CTO' },
+  ];
+
   const mockSubordinates = [
     {
       employee_id: 2,
@@ -53,6 +64,8 @@ describe('Home Page', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     localStorage.removeItem('employee_id');
+    // Mock getEmployees for LeaderSelector
+    vi.mocked(api.getEmployees).mockResolvedValue(mockEmployees);
   });
 
   it('should display subordinates list when data loads successfully', async () => {
@@ -116,6 +129,19 @@ describe('Home Page', () => {
     await waitFor(() => {
       expect(screen.getAllByRole('button', { name: /Avaliar/ })).toHaveLength(2);
       expect(screen.getAllByRole('button', { name: /histórico/i })).toHaveLength(2);
+    });
+  });
+
+  it('AC-37: shows leader selector prompt when API returns 401', async () => {
+    // Mock API to return 401 (unauthorized)
+    const error401 = new Error('Unauthorized');
+    (error401 as any).response = { status: 401 };
+    vi.mocked(api.getSubordinateEvaluations).mockRejectedValue(error401);
+
+    renderHome();
+
+    await waitFor(() => {
+      expect(screen.getByText(/Selecione sua identidade/i)).toBeInTheDocument();
     });
   });
 });

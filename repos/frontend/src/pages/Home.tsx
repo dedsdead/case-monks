@@ -21,7 +21,14 @@ export function Home() {
       .then(setEvaluations)
       .catch((error) => {
         if (error.name !== 'AbortError') {
-          setError(t('loadDataError'));
+          // AC-37: If error is 401 (unauthenticated), clear employee_id to show selector prompt
+          const axiosError = error as any;
+          if (axiosError.response?.status === 401) {
+            localStorage.removeItem('employee_id');
+            // Don't set error state - Layout will show selector prompt
+          } else {
+            setError(t('loadDataError'));
+          }
         }
       })
       .finally(() => {
@@ -44,7 +51,14 @@ export function Home() {
       .then(setEvaluations)
       .catch((error) => {
         if (error.name !== 'AbortError') {
-          setError(t('loadDataError'));
+          // AC-37: If error is 401 (unauthenticated), clear employee_id to show selector prompt
+          const axiosError = error as any;
+          if (axiosError.response?.status === 401) {
+            localStorage.removeItem('employee_id');
+            // Don't set error state - Layout will show selector prompt
+          } else {
+            setError(t('loadDataError'));
+          }
         }
       })
       .finally(() => {

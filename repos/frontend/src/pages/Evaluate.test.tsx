@@ -67,4 +67,14 @@ describe("Evaluate page", () => {
       expect(screen.getByText(/funcionário não encontrado/i)).toBeInTheDocument();
     });
   });
+
+  it("AC-33: shows error on 403 when evaluating self", async () => {
+    vi.mocked(api.getEmployee).mockRejectedValue({ response: { status: 403 } });
+    vi.mocked(api.getQuestions).mockResolvedValue([]);
+    renderEvaluate("4"); // Employee 4 (current user in beforeEach)
+
+    await waitFor(() => {
+      expect(screen.getByText(/não tem acesso/i)).toBeInTheDocument();
+    });
+  });
 });
