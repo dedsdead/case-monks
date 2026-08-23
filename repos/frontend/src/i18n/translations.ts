@@ -14,6 +14,7 @@ export const translations = {
     close: 'Fechar',
     toggleMenu: 'Alternar menu',
     openMenu: 'Abrir menu',
+    selectLanguage: 'Idioma',
     
     // Authentication
     login: 'Entrar',
@@ -126,6 +127,7 @@ export const translations = {
     close: 'Close',
     toggleMenu: 'Toggle menu',
     openMenu: 'Open menu',
+    selectLanguage: 'Language',
     
     // Authentication
     login: 'Sign in',

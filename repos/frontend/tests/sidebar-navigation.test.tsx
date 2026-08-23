@@ -8,6 +8,11 @@ vi.mock("../src/services/api");
 
 beforeEach(() => {
   window.history.replaceState({}, "", "/");
+  Object.defineProperty(window, "innerWidth", {
+    writable: true,
+    configurable: true,
+    value: 1024,
+  });
   localStorage.clear();
   localStorage.setItem("employee_id", "1");
   vi.clearAllMocks();
@@ -34,6 +39,11 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  Object.defineProperty(window, "innerWidth", {
+    writable: true,
+    configurable: true,
+    value: 1024,
+  });
   localStorage.clear();
 });
 
@@ -50,29 +60,40 @@ describe("Collapsible Sidebar Navigation", () => {
     expect(
       screen.getByRole("link", { name: "Histórico de Avaliações" })
     ).toHaveAttribute("href", "/history");
-    expect(screen.getByRole("button", { name: /alternar menu/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /alternar menu/i })
+    ).toBeInTheDocument();
   });
 
-  it("collapses and expands the sidebar", async () => {
-    const user = userEvent.setup();
+  it("collapses and expands the sidebar keeping footer controls accessible", async () => {
     render(<App />);
 
     await waitFor(() => {
       expect(screen.getByText("Meus Subordinados")).toBeInTheDocument();
     });
 
-    // Sidebar expanded by default on desktop: logo visible
+    // Sidebar expanded by default on desktop: brand title visible
     expect(screen.getByText("Avaliações")).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: /alternar menu/i }));
+    fireEvent.click(screen.getByRole("button", { name: /alternar menu/i }));
 
-    // Collapsed: logo hidden
-    expect(screen.queryByText("Avaliações")).not.toBeInTheDocument();
+    // Collapsed: brand title removed from DOM
+    await waitFor(() => {
+      expect(screen.queryByText("Avaliações")).not.toBeInTheDocument();
+    });
 
-    await user.click(screen.getByRole("button", { name: /alternar menu/i }));
+    // Footer controls remain reachable while collapsed
+    expect(
+      screen.getByRole("button", { name: /trocar líder/i })
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /idioma/i })).toBeInTheDocument();
 
-    // Expanded again: logo visible
-    expect(screen.getByText("Avaliações")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /alternar menu/i }));
+
+    // Expanded again: brand title visible
+    await waitFor(() => {
+      expect(screen.getByText("Avaliações")).toBeInTheDocument();
+    });
   });
 
   it("highlights the active navigation item", async () => {
@@ -84,24 +105,20 @@ describe("Collapsible Sidebar Navigation", () => {
     });
 
     const homeLink = screen.getByRole("link", { name: "Início" });
-    expect(homeLink.style.backgroundColor).toBe("var(--color-border)");
+    expect(homeLink).toHaveAttribute("data-active", "true");
 
     const historyLink = screen.getByRole("link", { name: "Histórico de Avaliações" });
-    expect(historyLink.style.backgroundColor).toBe("transparent");
+    expect(historyLink).toHaveAttribute("data-active", "false");
 
     await user.click(historyLink);
 
     await waitFor(() => {
-      expect(
-        screen.getByRole("link", { name: "Histórico de Avaliações" }).style.backgroundColor
-      ).toBe("var(--color-border)");
+      expect(historyLink).toHaveAttribute("data-active", "true");
     });
-    expect(
-      screen.getByRole("link", { name: "Início" }).style.backgroundColor
-    ).toBe("transparent");
+    expect(homeLink).toHaveAttribute("data-active", "false");
   });
 
-  it("shows hamburger menu instead of sidebar on mobile", async () => {
+  it("shows offcanvas drawer instead of sidebar on mobile", async () => {
     Object.defineProperty(window, "innerWidth", {
       writable: true,
       configurable: true,
@@ -115,11 +132,10 @@ describe("Collapsible Sidebar Navigation", () => {
         expect(screen.getByText("Meus Subordinados")).toBeInTheDocument();
       });
 
-      // Mobile: sidebar collapsed, hamburger button shown
+      // Mobile: drawer closed initially, brand title not mounted
       expect(screen.queryByText("Avaliações")).not.toBeInTheDocument();
-      expect(screen.getByRole("button", { name: /abrir menu/i })).toBeInTheDocument();
 
-      fireEvent.click(screen.getByRole("button", { name: /abrir menu/i }));
+      fireEvent.click(screen.getByRole("button", { name: /alternar menu/i }));
       expect(screen.getByText("Avaliações")).toBeInTheDocument();
     } finally {
       Object.defineProperty(window, "innerWidth", {

@@ -1,6 +1,8 @@
 import { useEffect, useState, useRef } from "react";
 import { createPortal } from "react-dom";
+import { X } from "lucide-react";
 import { useLanguage } from "../../i18n/LanguageContext";
+import { cn } from "../../lib/utils";
 
 interface ToastProps {
   message: string;
@@ -14,7 +16,6 @@ export function Toast({ message, type, onClose }: ToastProps) {
   const onCloseRef = useRef(onClose);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Keep onClose ref stable
   useEffect(() => {
     onCloseRef.current = onClose;
   }, [onClose]);
@@ -41,42 +42,24 @@ export function Toast({ message, type, onClose }: ToastProps) {
     <div
       role="status"
       aria-live="polite"
-      style={{
-        position: "fixed",
-        top: "1rem",
-        right: "1rem",
-        padding: "1rem 1.5rem",
-        borderRadius: "6px",
-        backgroundColor: type === "success" ? "var(--color-primary)" : "var(--color-danger)",
-        color: "var(--color-background)",
-        boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
-        zIndex: 2000,
-        maxWidth: "400px",
-        animation: "slideIn 0.3s ease-out",
-      }}
+      className={cn(
+        "fixed top-4 right-4 z-[2000] flex max-w-sm items-center gap-3 rounded-lg px-5 py-4 text-white shadow-lg animate-slide-up",
+        type === "success" ? "bg-success" : "bg-destructive"
+      )}
     >
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "1rem" }}>
-        <span>{message}</span>
-        {type === "error" && (
-          <button
-            onClick={() => {
-              setVisible(false);
-              closeTimerRef.current = setTimeout(() => onCloseRef.current(), 300);
-            }}
-            style={{
-              background: "none",
-              border: "none",
-              color: "var(--color-background)",
-              cursor: "pointer",
-              fontSize: "1.2rem",
-              padding: "0",
-              lineHeight: 1,
-            }}
-          >
-            {t('close')}
-          </button>
-        )}
-      </div>
+      <span className="text-sm font-medium">{message}</span>
+      {type === "error" && (
+        <button
+          onClick={() => {
+            setVisible(false);
+            closeTimerRef.current = setTimeout(() => onCloseRef.current(), 300);
+          }}
+          aria-label={t('close')}
+          className="min-h-0 rounded p-1 opacity-80 transition-opacity hover:opacity-100"
+        >
+          <X className="size-4" />
+        </button>
+      )}
     </div>,
     document.body,
   );

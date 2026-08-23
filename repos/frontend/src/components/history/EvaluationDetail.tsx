@@ -1,5 +1,14 @@
 import type { EvaluationSummary } from "../../types";
 import { useLanguage, formatScore } from "../../i18n/LanguageContext";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 interface EvaluationDetailProps {
   summary: EvaluationSummary;
@@ -9,98 +18,43 @@ export function EvaluationDetail({ summary }: EvaluationDetailProps) {
   const { t, language } = useLanguage();
 
   return (
-    <div style={{ padding: "0.75rem" }}>
-      <table style={{ width: "100%", borderCollapse: "collapse" }}>
-        <thead>
-          <tr>
-            {[t('question'), t('weight'), t('score'), t('contribution')].map((h) => (
-              <th
-                key={h}
-                style={{
-                  textAlign: "left",
-                  padding: "0.5rem",
-                  borderBottom: "1px solid var(--color-border)",
-                  color: "var(--color-muted)",
-                  fontSize: "0.8rem",
-                  fontWeight: 600,
-                }}
-              >
-                {h}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
+    <div className="p-2 md:p-4">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="text-xs">{t('question')}</TableHead>
+            <TableHead className="text-xs">{t('weight')}</TableHead>
+            <TableHead className="text-xs">{t('score')}</TableHead>
+            <TableHead className="text-xs">{t('contribution')}</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {summary.questions.map((q) => (
-            <tr key={q.question_id}>
-              <td
-                style={{
-                  padding: "0.5rem",
-                  color: "var(--color-primary)",
-                  fontSize: "0.85rem",
-                }}
-              >
-                {q.title}
-              </td>
-              <td
-                style={{
-                  padding: "0.5rem",
-                  color: "var(--color-muted)",
-                  fontSize: "0.85rem",
-                }}
-              >
+            <TableRow key={q.question_id}>
+              <TableCell className="text-sm">{q.title}</TableCell>
+              <TableCell className="tabular-nums text-muted-foreground">
                 {q.weight}
-              </td>
-              <td
-                style={{
-                  padding: "0.5rem",
-                  color: "var(--color-primary)",
-                  fontWeight: 600,
-                  fontSize: "0.85rem",
-                }}
-              >
+              </TableCell>
+              <TableCell className="font-semibold tabular-nums">
                 {q.score}
-              </td>
-              <td
-                style={{
-                  padding: "0.5rem",
-                  color: "var(--color-primary)",
-                  fontSize: "0.85rem",
-                }}
-              >
+              </TableCell>
+              <TableCell className="tabular-nums text-primary">
                 {formatScore((q.score * q.weight) / 100, language)}
-              </td>
-            </tr>
+              </TableCell>
+            </TableRow>
           ))}
-        </tbody>
-        <tfoot>
-          <tr>
-            <td
-              colSpan={3}
-              style={{
-                padding: "0.5rem",
-                fontWeight: 700,
-                color: "var(--color-primary)",
-                borderTop: "2px solid var(--color-border)",
-                fontSize: "0.85rem",
-              }}
-            >
+        </TableBody>
+        <TableFooter>
+          <TableRow>
+            <TableCell colSpan={3} className="font-bold">
               {t('total')}
-            </td>
-            <td
-              style={{
-                padding: "0.5rem",
-                fontWeight: 700,
-                color: "var(--color-primary)",
-                borderTop: "2px solid var(--color-border)",
-                fontSize: "0.85rem",
-              }}
-            >
+            </TableCell>
+            <TableCell className="font-bold tabular-nums text-primary">
               {formatScore(summary.total_score, language)}
-            </td>
-          </tr>
-        </tfoot>
-      </table>
+            </TableCell>
+          </TableRow>
+        </TableFooter>
+      </Table>
     </div>
   );
 }

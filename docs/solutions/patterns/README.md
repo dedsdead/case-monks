@@ -85,7 +85,7 @@ This documentation captures the reusable patterns that emerged from the recent w
 - Request cancellation with AbortController
 - Graceful degradation for partial failures
 - Detailed error logging and user feedback
-- i18n pattern for multi-language support
+- i18n pattern for multi-language support with memoized translation function
 - SQLAlchemy transaction management (avoid `db.begin()`)
 
 **Best Practices**:
@@ -95,7 +95,7 @@ This documentation captures the reusable patterns that emerged from the recent w
 - Use AbortController to cancel stale requests
 - Implement automatic redirection for authentication errors
 - Log detailed error information for debugging
-- Use translation keys (`t()`) for all user-facing text
+- Use translation keys (`t()`) for all user-facing text; include `t` in hook dependency arrays to prevent stale translations during language changes
 - Use `db.commit()` directly instead of `db.begin()` in SQLAlchemy sessions
 
 ## Pattern Relationships

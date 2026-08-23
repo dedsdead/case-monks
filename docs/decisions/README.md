@@ -4,7 +4,8 @@
 
 | ADR | Title | Status | Date |
 |-----|-------|--------|------|
-| _[001]_ | _[Title]_ | _[status]_ | _[date]_ |
+| [ADR-001](20260817-use-sql-dump-schema.md) | Use SQL Dump Schema for Employee Model | Accepted | 2026-08-17 |
+| [ADR-002](20260823-adopt-tailwind-shadcn-ui.md) | Adopt Tailwind CSS v4 + shadcn/ui for the Frontend | Accepted | 2026-08-23 |
 
 ## ADR Statuses
 

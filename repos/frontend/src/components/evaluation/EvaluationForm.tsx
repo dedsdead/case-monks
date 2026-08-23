@@ -1,7 +1,15 @@
 import { useState } from "react";
+import { SendHorizontal } from "lucide-react";
 import type { Employee, Question } from "../../types";
 import { useLanguage, formatScore } from "../../i18n/LanguageContext";
 import { ConfirmDialog } from "./ConfirmDialog";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import {
+  Card,
+  CardContent,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 
 interface EvaluationFormProps {
   employee: Employee;
@@ -23,11 +31,14 @@ export function EvaluationForm({
   const [showConfirm, setShowConfirm] = useState(false);
 
   const scoredCount = Object.keys(scores).length;
-  const allValid = scoredCount === 6 && Object.values(scores).every((s) => s >= 1 && s <= 4);
+  const allValid =
+    questions.length > 0 &&
+    scoredCount === questions.length &&
+    Object.values(scores).every((s) => s >= 1 && s <= 4);
 
   const weightedScore = questions.reduce((sum, q) => {
     const score = scores[q.id];
-    return score ? sum + (score * q.weight) / 100 : sum;
+    return score !== undefined ? sum + (score * q.weight) / 100 : sum;
   }, 0);
 
   const handleScoreChange = (questionId: number, value: string) => {
@@ -53,112 +64,88 @@ export function EvaluationForm({
   };
 
   return (
-    <div>
-      <h2 style={{ color: "var(--color-primary)", marginBottom: "0.25rem" }}>
+    <div className="animate-fade-in">
+      <h2 className="text-xl font-semibold tracking-tight">
         {t('evaluate')} — {employee.name}
       </h2>
-      <p style={{ color: "var(--color-muted)", marginBottom: "1.5rem" }}>
+      <p className="mt-1 text-sm text-muted-foreground">
         {employee.position_name}
       </p>
 
       {error && (
         <div
           role="alert"
-          style={{
-            padding: "0.75rem",
-            backgroundColor: "var(--color-danger)",
-            color: "var(--color-background)",
-            borderRadius: "4px",
-            marginBottom: "1rem",
-            fontSize: "0.9rem",
-          }}
+          className="mt-4 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive"
         >
           {error}
         </div>
       )}
 
-      <div style={{ marginBottom: "1rem", color: "var(--color-muted)", fontSize: "0.9rem" }}>
+      <p className="mt-4 text-sm text-muted-foreground">
         {scoredCount} {t('questionsAnswered')}
         {scoredCount > 0 && (
-          <span style={{ marginLeft: "1rem", color: "var(--color-primary)", fontWeight: 600 }}>
+          <span className="ml-4 font-semibold text-primary">
             {t('partialScore')}: {formatScore(weightedScore, language)}
           </span>
         )}
-      </div>
+      </p>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+      <div className="mt-6 grid gap-4 md:grid-cols-2">
         {questions.map((q) => {
           const val = scores[q.id];
           const hasError = val !== undefined && (val < 1 || val > 4);
           return (
-            <div
+            <Card
               key={q.id}
-              style={{
-                padding: "1rem",
-                border: "1px solid var(--color-border)",
-                borderRadius: "6px",
-                backgroundColor: "var(--color-background)",
-              }}
+              className={cn(
+                "gap-3 py-4 transition-colors",
+                hasError && "border-destructive/50"
+              )}
             >
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem" }}>
-                <span style={{ color: "var(--color-primary)", fontWeight: 600 }}>
+              <CardContent className="flex items-start justify-between gap-4 px-4">
+                <span className="text-sm leading-snug font-semibold text-foreground">
                   {q.title}
                 </span>
-                <span style={{ color: "var(--color-muted)", fontSize: "0.85rem" }}>
+                <span className="shrink-0 rounded-md bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground">
                   {t('weight')}: {q.weight}
                 </span>
-              </div>
-              <input
-                type="number"
-                min={1}
-                max={4}
-                value={val !== undefined ? val : ""}
-                onChange={(e) => handleScoreChange(q.id, e.target.value)}
-                aria-label={`${t('score')} ${q.title}`}
-                aria-invalid={hasError || undefined}
-                aria-describedby={hasError ? `score-error-${q.id}` : undefined}
-                style={{
-                  width: "80px",
-                  padding: "0.5rem",
-                  border: `1px solid ${hasError ? "var(--color-danger)" : "var(--color-border)"}`,
-                  borderRadius: "4px",
-                  backgroundColor: "var(--color-background)",
-                  color: "var(--color-primary)",
-                  fontSize: "1rem",
-                }}
-              />
-              {hasError && (
-                <p
-                  id={`score-error-${q.id}`}
-                  style={{ color: "var(--color-danger)", fontSize: "0.8rem", marginTop: "0.25rem" }}
-                >
-                  {t('scoreRange')}
-                </p>
-              )}
-            </div>
+              </CardContent>
+              <CardContent className="px-4">
+                <Input
+                  type="number"
+                  min={1}
+                  max={4}
+                  value={val !== undefined ? val : ""}
+                  onChange={(e) => handleScoreChange(q.id, e.target.value)}
+                  aria-label={`${t('score')} ${q.title}`}
+                  aria-invalid={hasError || undefined}
+                  aria-describedby={hasError ? `score-error-${q.id}` : undefined}
+                  className={cn("w-24", hasError && "border-destructive")}
+                />
+                {hasError && (
+                  <p
+                    id={`score-error-${q.id}`}
+                    className="mt-1.5 text-xs text-destructive"
+                  >
+                    {t('scoreRange')}
+                  </p>
+                )}
+              </CardContent>
+            </Card>
           );
         })}
       </div>
 
-      <div style={{ marginTop: "1.5rem" }}>
-        <button
+      <div className="mt-8">
+        <Button
           onClick={handleSubmit}
           disabled={!allValid || isSubmitting}
-          style={{
-            padding: "0.75rem 2rem",
-            backgroundColor: allValid && !isSubmitting
-              ? "var(--color-primary)"
-              : "var(--color-border)",
-            color: "var(--color-background)",
-            border: "none",
-            borderRadius: "4px",
-            cursor: allValid && !isSubmitting ? "pointer" : "not-allowed",
-            fontSize: "1rem",
-            fontWeight: 600,
-          }}
+          size="lg"
+          className="font-semibold"
         >
+          <SendHorizontal />
           {isSubmitting ? `${t('evaluating')}...` : t('submitEvaluation')}
-        </button>
+        </Button>
       </div>
 
       <ConfirmDialog

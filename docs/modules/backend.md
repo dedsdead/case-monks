@@ -122,6 +122,7 @@ Main backend with API and business logic.
 ### i18n System
 - **All user-facing text across the entire app** (pages, layout, dialogs, toasts, tables) uses the i18n system — no hardcoded strings (completed 2026-08-22)
 - Translation keys are defined in `repos/frontend/src/i18n/translations.ts` (pt-BR/en parity)
-- Components use `useLanguage()` hook to access translations; `t(key, {param})` supports `{param}` interpolation
+- Components use `useLanguage()` hook to access translations; `t(key, {param})` is memoized using useMemo([language]) to prevent unnecessary re-renders on language change
 - Locale-aware formatting helpers are exported from `repos/frontend/src/i18n/LanguageContext.tsx`: `formatScore(value, language)` and `formatDate(date, language, options?)` — Intl-based, pt-BR renders comma decimals, en renders en-US. Do not use `.toFixed(2)` or hardcoded `"pt-BR"` date formatting in components.
 - `document.documentElement.lang` is synced on language change; support for both Portuguese (pt-BR) and English (en) languages
+- **Performance**: Include `t` in useEffect and useCallback dependency arrays to prevent stale translations during language changes; removed premature optimization that caused race conditions

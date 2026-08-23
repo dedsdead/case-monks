@@ -1,44 +1,41 @@
+import { Check, Languages } from "lucide-react";
 import { useLanguage, type Language } from "../../i18n/LanguageContext";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+const LANGUAGES: { value: Language; label: string }[] = [
+  { value: "pt-BR", label: "Português (BR)" },
+  { value: "en", label: "English" },
+];
 
 export function LanguageSwitcher() {
-  const { language, setLanguage } = useLanguage();
-
-  const handleLanguageChange = (newLang: Language) => {
-    setLanguage(newLang);
-  };
+  const { language, setLanguage, t } = useLanguage();
 
   return (
-    <div role="group" aria-label={language === 'pt-BR' ? 'Idioma' : 'Language'} style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-      <button
-        onClick={() => handleLanguageChange("pt-BR")}
-        aria-pressed={language === "pt-BR"}
-        style={{
-          padding: "0.25rem 0.5rem",
-          border: "1px solid var(--color-border)",
-          borderRadius: "4px",
-          background: language === "pt-BR" ? "var(--color-primary)" : "transparent",
-          color: language === "pt-BR" ? "white" : "var(--color-muted)",
-          cursor: "pointer",
-          fontSize: "0.75rem",
-        }}
-      >
-        PT
-      </button>
-      <button
-        onClick={() => handleLanguageChange("en")}
-        aria-pressed={language === "en"}
-        style={{
-          padding: "0.25rem 0.5rem",
-          border: "1px solid var(--color-border)",
-          borderRadius: "4px",
-          background: language === "en" ? "var(--color-primary)" : "transparent",
-          color: language === "en" ? "white" : "var(--color-muted)",
-          cursor: "pointer",
-          fontSize: "0.75rem",
-        }}
-      >
-        EN
-      </button>
-    </div>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" aria-label={t("selectLanguage")} title={t("selectLanguage")}>
+          <Languages className="size-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" side="right" sideOffset={8}>
+        {LANGUAGES.map((entry) => (
+          <DropdownMenuItem
+            key={entry.value}
+            role="menuitemradio"
+            aria-checked={language === entry.value}
+            onSelect={() => setLanguage(entry.value)}
+          >
+            <span className="flex-1">{entry.label}</span>
+            {language === entry.value && <Check className="size-4" />}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

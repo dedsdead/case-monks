@@ -1,16 +1,25 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { ArrowLeft, CheckCircle2 } from "lucide-react";
 import { getEmployee, getQuestions, submitEvaluation } from "../services/api";
+import { getResponseStatus } from "../lib/http";
 import type { Employee, Question } from "../types";
 import { EvaluationForm } from "../components/evaluation/EvaluationForm";
 import { LoadingSpinner } from "../components/ui/LoadingSpinner";
 import { Toast } from "../components/ui/Toast";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+} from "@/components/ui/card";
 import { useLanguage } from "../i18n/LanguageContext";
+import { useAuth } from "../hooks/useAuth";
 
 export function Evaluate() {
   const { employeeId } = useParams<{ employeeId: string }>();
   const navigate = useNavigate();
   const { t } = useLanguage();
+  const { resetEmployee } = useAuth();
   const [employee, setEmployee] = useState<Employee | null>(null);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
@@ -19,6 +28,15 @@ export function Evaluate() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const navTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Clear the submit-path redirect timer on unmount (the load-path timer
+  // is cleared by the fetch effect's own cleanup).
+  useEffect(() => {
+    return () => {
+      if (navTimerRef.current) clearTimeout(navTimerRef.current);
+    };
+  }, []);
 
   useEffect(() => {
     if (!employeeId) return;
@@ -29,7 +47,7 @@ export function Evaluate() {
       .then(emp => {
         if (ctrl.signal.aborted) return;
         setEmployee(emp);
-        
+
         // Then fetch questions
         return getQuestions(ctrl.signal);
       })
@@ -41,8 +59,15 @@ export function Evaluate() {
       })
       .catch((err) => {
         if (ctrl.signal.aborted) return;
-        const status = err?.response?.status;
-        
+        const status = getResponseStatus(err);
+
+        // AC-37: session expired/invalid — reset identity so the selector
+        // prompt replaces the app shell.
+        if (status === 401) {
+          resetEmployee();
+          return;
+        }
+
         if (status === 404) {
           setToast({ message: t('employeeNotFoundError'), type: "error" });
           timerRef.current = setTimeout(() => navigate("/"), 2000);
@@ -52,12 +77,12 @@ export function Evaluate() {
             type: "error",
           });
           timerRef.current = setTimeout(() => navigate("/"), 2000);
-        } else if (status === 500) {
+        } else if (status !== undefined && status >= 500) {
           setToast({
             message: t('serverError'),
             type: "error",
           });
-        } else if (status >= 400) {
+        } else if (status !== undefined && status >= 400) {
           setToast({
             message: t('unknownError'),
             type: "error",
@@ -81,7 +106,7 @@ export function Evaluate() {
   }, [employeeId, navigate, t]);
 
   const handleSubmit = async (scores: Record<number, number>) => {
-    if (!employeeId) return;
+    if (!employeeId || isSubmitting || isSubmitted) return;
     setIsSubmitting(true);
     try {
       await submitEvaluation({
@@ -95,7 +120,7 @@ export function Evaluate() {
       setIsSubmitted(true);
       // Don't auto-redirect - let user decide what to do next
     } catch (err: unknown) {
-      const status = (err as { response?: { status?: number } })?.response?.status;
+      const status = getResponseStatus(err);
       if (status === 409) {
         setError(t('alreadyEvaluated'));
       } else if (status === 403) {
@@ -103,7 +128,7 @@ export function Evaluate() {
           message: t('accessDeniedError'),
           type: "error",
         });
-        timerRef.current = setTimeout(() => navigate("/"), 2000);
+        navTimerRef.current = setTimeout(() => navigate("/"), 2000);
       } else {
         setError(t('evaluationError'));
       }
@@ -126,89 +151,36 @@ export function Evaluate() {
     <>
       {employee && questions.length > 0 ? (
         <>
-          {/* Navigation Header */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              marginBottom: "1rem",
-              gap: "1rem",
-            }}
-          >
-            <button
-              onClick={handleGoBack}
-              style={{
-                padding: "0.4rem 0.8rem",
-                backgroundColor: "var(--color-border)",
-                color: "var(--color-primary)",
-                border: "none",
-                borderRadius: "4px",
-                cursor: "pointer",
-                fontSize: "0.85rem",
-                textDecoration: "none",
-              }}
-            >
-              ← {t('back')}
-            </button>
-            <h1 style={{ color: "var(--color-primary)", margin: 0 }}>
+          <div className="mb-6 flex items-center gap-3">
+            <Button variant="ghost" size="sm" onClick={handleGoBack}>
+              <ArrowLeft />
+              {t('back')}
+            </Button>
+            <h2 className="truncate text-xl font-semibold tracking-tight">
               {t('evaluateTitle', { name: employee.name })}
-            </h1>
+            </h2>
           </div>
 
-          {/* Success State */}
           {isSubmitted && (
-            <div
-              style={{
-                padding: "2rem",
-                backgroundColor: "var(--color-success)",
-                color: "var(--color-background)",
-                borderRadius: "8px",
-                marginBottom: "1rem",
-                textAlign: "center",
-              }}
-            >
-              <h2 style={{ margin: "0 0 1rem 0" }}>{t('evaluationSubmitted')}</h2>
-              <div
-                style={{
-                  display: "flex",
-                  gap: "1rem",
-                  justifyContent: "center",
-                  marginTop: "1rem",
-                }}
-              >
-                <button
-                  onClick={handleGoBack}
-                  style={{
-                    padding: "0.6rem 1.2rem",
-                    backgroundColor: "var(--color-primary)",
-                    color: "var(--color-background)",
-                    border: "none",
-                    borderRadius: "4px",
-                    cursor: "pointer",
-                    fontSize: "0.9rem",
-                  }}
-                >
-                  {t('back')}
-                </button>
-                <button
-                  onClick={handleViewHistory}
-                  style={{
-                    padding: "0.6rem 1.2rem",
-                    backgroundColor: "var(--color-border)",
-                    color: "var(--color-primary)",
-                    border: "none",
-                    borderRadius: "4px",
-                    cursor: "pointer",
-                    fontSize: "0.9rem",
-                  }}
-                >
-                  {t('evaluationHistory')}
-                </button>
-              </div>
-            </div>
+            <Card className="mb-6 border-success/30 bg-success/10 animate-slide-up">
+              <CardContent className="flex flex-col items-center gap-5 text-center">
+                <CheckCircle2 className="size-12 text-success" />
+                <h3 className="text-lg font-semibold text-foreground">
+                  {t('evaluationSubmitted')}
+                </h3>
+                <div className="flex flex-wrap justify-center gap-3">
+                  <Button variant="outline" onClick={handleGoBack}>
+                    <ArrowLeft />
+                    {t('back')}
+                  </Button>
+                  <Button onClick={handleViewHistory}>
+                    {t('evaluationHistory')}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           )}
 
-          {/* Evaluation Form */}
           {!isSubmitted && (
             <EvaluationForm
               employee={employee}
@@ -220,24 +192,12 @@ export function Evaluate() {
           )}
         </>
       ) : error ? (
-        <div style={{ padding: "2rem", color: "var(--color-muted)" }}>
-          {error}
-          <div style={{ marginTop: "1rem" }}>
-            <button
-              onClick={handleGoBack}
-              style={{
-                padding: "0.4rem 0.8rem",
-                backgroundColor: "var(--color-primary)",
-                color: "var(--color-background)",
-                border: "none",
-                borderRadius: "4px",
-                cursor: "pointer",
-                fontSize: "0.85rem",
-              }}
-            >
-              ← {t('back')}
-            </button>
-          </div>
+        <div className="flex flex-col gap-4 py-8 text-muted-foreground">
+          <p>{error}</p>
+          <Button variant="ghost" size="sm" onClick={handleGoBack}>
+            <ArrowLeft />
+            {t('back')}
+          </Button>
         </div>
       ) : null}
       {toast && (

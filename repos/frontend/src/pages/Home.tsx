@@ -1,139 +1,93 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { RefreshCw } from "lucide-react";
 import { getSubordinateEvaluations } from "../services/api";
+import { getResponseStatus } from "../lib/http";
+import { useAuth } from "../hooks/useAuth";
 import type { SubordinateEvaluation } from "../types";
 import { EmployeeList } from "../components/employee/EmployeeList";
 import { EmptyState } from "../components/ui/EmptyState";
 import { LoadingSpinner } from "../components/ui/LoadingSpinner";
-import { Toast } from "../components/ui/Toast";
+import { Button } from "@/components/ui/button";
 import { useLanguage } from "../i18n/LanguageContext";
 
 export function Home() {
   const [evaluations, setEvaluations] = useState<SubordinateEvaluation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+  const { resetEmployee } = useAuth();
   const { t } = useLanguage();
+  const refreshCtrlRef = useRef<AbortController | null>(null);
+
+  const load = useCallback(
+    (controller: AbortController) => {
+      getSubordinateEvaluations(controller.signal)
+        .then(setEvaluations)
+        .catch((error) => {
+          if (controller.signal.aborted) return;
+          // AC-37: session expired/invalid — full identity reset so the
+          // selector prompt replaces the app shell on the next render.
+          if (getResponseStatus(error) === 401) {
+            resetEmployee();
+            return;
+          }
+          setError(t('loadDataError'));
+        })
+        .finally(() => {
+          if (!controller.signal.aborted) {
+            setLoading(false);
+          }
+        });
+    },
+    [resetEmployee, t]
+  );
 
   useEffect(() => {
     const abortController = new AbortController();
-
-    getSubordinateEvaluations(abortController.signal)
-      .then(setEvaluations)
-      .catch((error) => {
-        if (error.name !== 'AbortError') {
-          // AC-37: If error is 401 (unauthenticated), clear employee_id to show selector prompt
-          const axiosError = error as any;
-          if (axiosError.response?.status === 401) {
-            localStorage.removeItem('employee_id');
-            // Don't set error state - Layout will show selector prompt
-          } else {
-            setError(t('loadDataError'));
-          }
-        }
-      })
-      .finally(() => {
-        if (!abortController.signal.aborted) {
-          setLoading(false);
-        }
-      });
+    load(abortController);
 
     return () => {
       abortController.abort();
+      refreshCtrlRef.current?.abort();
     };
-  }, [t]);
+  }, [load]);
 
   const handleRefresh = () => {
     setLoading(true);
     setError(null);
+    refreshCtrlRef.current?.abort();
     const abortController = new AbortController();
-
-    getSubordinateEvaluations(abortController.signal)
-      .then(setEvaluations)
-      .catch((error) => {
-        if (error.name !== 'AbortError') {
-          // AC-37: If error is 401 (unauthenticated), clear employee_id to show selector prompt
-          const axiosError = error as any;
-          if (axiosError.response?.status === 401) {
-            localStorage.removeItem('employee_id');
-            // Don't set error state - Layout will show selector prompt
-          } else {
-            setError(t('loadDataError'));
-          }
-        }
-      })
-      .finally(() => {
-        if (!abortController.signal.aborted) {
-          setLoading(false);
-        }
-      });
+    refreshCtrlRef.current = abortController;
+    load(abortController);
   };
 
   if (loading) return <LoadingSpinner />;
   if (error) return (
-    <div style={styles.errorContainer}>
-      <p style={styles.errorText}>{error}</p>
-      <button onClick={handleRefresh} className="btn btn-secondary">
+    <div className="flex flex-col items-center justify-center gap-6 py-16 text-center">
+      <p className="max-w-md text-lg text-muted-foreground">{error}</p>
+      <Button variant="outline" onClick={handleRefresh}>
+        <RefreshCw />
         {t('retry')}
-      </button>
+      </Button>
     </div>
   );
   if (evaluations.length === 0)
     return <EmptyState message={t('noSubordinatesMessage')} />;
 
   return (
-    <div style={styles.container}>
-      <div style={styles.header}>
+    <div className="flex flex-col gap-6 animate-fade-in">
+      <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="page-title">{t('subordinatesTitle')}</h1>
-          <p className="page-subtitle">
+          <h2 className="text-2xl font-bold tracking-tight">{t('subordinatesTitle')}</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
             {t('subordinatesCount', { count: evaluations.length })}
           </p>
         </div>
-        <button onClick={handleRefresh} className="btn btn-secondary">
-          ↻ {t('refresh')}
-        </button>
+        <Button variant="outline" onClick={handleRefresh}>
+          <RefreshCw />
+          {t('refresh')}
+        </Button>
       </div>
       <EmployeeList evaluations={evaluations} />
-      {toast && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={() => setToast(null)}
-        />
-      )}
     </div>
   );
 }
-
-const styles = {
-  container: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '1.5rem',
-    animation: 'fadeIn 0.3s ease-in',
-  } as React.CSSProperties,
-  header: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    gap: '1rem',
-    padding: '0',
-    animation: 'slideUp 0.3s ease-out',
-  } as React.CSSProperties,
-  errorContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: '3rem 1rem',
-    color: 'var(--color-muted)',
-    textAlign: 'center',
-    gap: '1.5rem',
-    animation: 'fadeIn 0.3s ease-in',
-  } as React.CSSProperties,
-  errorText: {
-    fontSize: '1.1rem',
-    margin: '0',
-    maxWidth: '500px',
-  } as React.CSSProperties,
-};

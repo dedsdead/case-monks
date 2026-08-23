@@ -1,3 +1,4 @@
+import { Loader2 } from "lucide-react";
 import { useLanguage } from "../../i18n/LanguageContext";
 
 interface LoadingSpinnerProps {
@@ -11,24 +12,12 @@ export function LoadingSpinner({ size = 32 }: LoadingSpinnerProps) {
     <div
       role="status"
       aria-label={t('loading')}
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        padding: "2rem",
-      }}
+      className="flex items-center justify-center p-8"
     >
-      <div
-        style={{
-          width: size,
-          height: size,
-          border: "3px solid var(--color-border)",
-          borderTopColor: "var(--color-primary)",
-          borderRadius: "50%",
-          animation: "spin 0.8s linear infinite",
-        }}
+      <Loader2
+        className="animate-spin text-primary"
+        style={{ width: size, height: size }}
       />
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }

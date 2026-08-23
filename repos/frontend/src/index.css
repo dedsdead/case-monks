@@ -1,156 +1,210 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
 :root {
-  --color-primary: #2c2c2c;
-  --color-background: #f5f5f5;
-  --color-muted: #6b7280;
-  --color-border: #d1d5db;
-  --color-secondary: #9ca3af;
-  --color-accent: #3b82f6;
-  --color-success: #27ae60;
-  --color-danger: #c0392b;
-  --color-danger-background: #f8d7da;
-  --color-danger-border: #f5c6cb;
+  --radius: 0.625rem;
 
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  --background: #e8e7e2;
+  --foreground: #2c2c2c;
+  --card: #ffffff;
+  --card-foreground: #2c2c2c;
+  --popover: #ffffff;
+  --popover-foreground: #2c2c2c;
+
+  --primary: #2c2c2c;
+  --primary-foreground: #ffffff;
+  --secondary: #f0f0f0;
+  --secondary-foreground: #2c2c2c;
+  --muted: #f0f0f0;
+  --muted-foreground: #767573;
+  --accent: #f5f5f5;
+  --accent-foreground: #379294;
+
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --success: #16a34a;
+  --success-foreground: #ffffff;
+  --warning: #ca8a04;
+  --warning-foreground: #ffffff;
+
+  --border: #949492;
+  --input: #949492;
+  --ring: #2c2c2c;
+
+  --chart-1: #2c2c2c;
+  --chart-2: #16a34a;
+  --chart-3: #ca8a04;
+  --chart-4: #dc2626;
+  --chart-5: #767573;
+
+  --sidebar: #e8e7e2;
+  --sidebar-foreground: #2c2c2c;
+  --sidebar-primary: #2c2c2c;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f0f0f0;
+  --sidebar-accent-foreground: #379294;
+  --sidebar-border: #949492;
+  --sidebar-ring: #2c2c2c;
 }
 
-body {
-  margin: 0;
-  background-color: var(--color-background);
-  color: var(--color-primary);
-  min-height: 100vh;
+.dark {
+  --background: #1a1a1a;
+  --foreground: #f5f5f5;
+  --card: #252525;
+  --card-foreground: #f5f5f5;
+  --popover: #252525;
+  --popover-foreground: #f5f5f5;
+
+  --primary: #f5f5f5;
+  --primary-foreground: #2c2c2c;
+  --secondary: #333333;
+  --secondary-foreground: #f5f5f5;
+  --muted: #333333;
+  --muted-foreground: #b4b4b4;
+  --accent: #333333;
+  --accent-foreground: #f5f5f5;
+
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --success: #22c55e;
+  --success-foreground: #ffffff;
+  --warning: #eab308;
+  --warning-foreground: #ffffff;
+
+  --border: rgba(148, 148, 146, 0.2);
+  --input: rgba(148, 148, 146, 0.2);
+  --ring: #f5f5f5;
+
+  --chart-1: #f5f5f5;
+  --chart-2: #22c55e;
+  --chart-3: #eab308;
+  --chart-4: #ef4444;
+  --chart-5: #b4b4b4;
+
+  --sidebar: #252525;
+  --sidebar-foreground: #f5f5f5;
+  --sidebar-primary: #f5f5f5;
+  --sidebar-primary-foreground: #2c2c2c;
+  --sidebar-accent: #333333;
+  --sidebar-accent-foreground: #f5f5f5;
+  --sidebar-border: rgba(148, 148, 146, 0.2);
+  --sidebar-ring: #f5f5f5;
 }
 
-#root {
-  min-height: 100vh;
-}
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
 
-* {
-  box-sizing: border-box;
-}
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
 
-button, input, select {
-  min-height: 44px;
-}
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
 
-/* Shared button utilities */
-.btn {
-  padding: 0.6rem 1.2rem;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 500;
-  font-family: inherit;
-  transition: all 0.2s ease;
-}
+  --animate-fade-in: fade-in 0.3s ease-out;
+  --animate-slide-up: slide-up 0.25s ease-out;
 
-.btn-primary {
-  background-color: var(--color-primary);
-  color: var(--color-background);
-}
-
-.btn-secondary {
-  background-color: var(--color-border);
-  color: var(--color-primary);
-}
-
-.btn-primary:disabled {
-  background-color: var(--color-border);
-  color: var(--color-muted);
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-.page-title {
-  color: var(--color-primary);
-  margin: 0 0 0.5rem 0;
-  font-size: 1.5rem;
-  font-weight: 600;
-}
-
-.page-subtitle {
-  color: var(--color-muted);
-  margin: 0;
-  font-size: 0.95rem;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
-  to {
-    opacity: 1;
+
+  @keyframes slide-up {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 }
 
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-
-th {
-  background-color: var(--color-primary);
-  color: var(--color-background);
-  text-align: left;
-  padding: 0.875rem 1rem;
-  font-weight: 600;
-  font-size: 0.95rem;
-  white-space: nowrap;
-}
-
-td {
-  padding: 0.875rem 1rem;
-  color: var(--color-muted);
-  border-bottom: 1px solid var(--color-border);
-}
-
-tr:last-child td {
-  border-bottom: none;
-}
-
-tr:hover td {
-  background-color: var(--color-background);
-}
-
-@media (max-width: 768px) {
-  main {
-    padding: 1rem !important;
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
   }
 
-  table {
-    font-size: 0.85rem;
+  html {
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
-  th, td {
-    padding: 0.5rem !important;
+  body {
+    @apply bg-background text-foreground;
+    min-height: 100vh;
   }
 
-  button {
-    min-height: 44px;
-    width: 100%;
+  #root {
+    min-height: 100vh;
+  }
+
+  /* WCAG 2.5.8 target-size floor for interactive controls.
+     NOTE: the exemptions are coupled to shadcn's internal data-size
+     attribute values ("icon", "icon-sm") — if a future shadcn CLI update
+     renames them, icon buttons silently regain the 44px height.
+     Raw <button> elements outside ui/button.tsx need an explicit
+     min-h-0 utility to opt out (see Toast close button). */
+  button:not([data-size="icon"]):not([data-size="icon-sm"]),
+  input,
+  select,
+  textarea {
+    min-height: 2.75rem;
   }
 }
 
-@media (min-width: 769px) and (max-width: 1024px) {
-  main {
-    padding: 1.25rem !important;
-  }
+/* Fix for select options in dark mode */
+select option {
+  color: var(--foreground);
+  background-color: var(--background);
+}
+
+select option:disabled {
+  color: var(--muted-foreground);
 }
