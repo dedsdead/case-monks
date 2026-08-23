@@ -28,7 +28,7 @@ DATABASE_URL=sqlite:///./data/casetecnico.db
 API_HOST=0.0.0.0
 API_PORT=8000
 
-# Debug
+# Debug (gates /api/test-cookies; false = endpoint returns 404)
 DEBUG=true
 ```
 
@@ -91,20 +91,22 @@ docker-compose up --build
 
 ### Debug Endpoints
 
+> `/api/test-cookies` requires `DEBUG=true` in the backend `.env` — it returns 404 when the flag is off. `/api/health` is always available.
+
 #### Local Development
 - **Health Check:** `http://localhost:8000/api/health`
-- **Cookie Debug:** `http://localhost:8000/api/test-cookies`
+- **Cookie Debug:** `http://localhost:8000/api/test-cookies` (requires `DEBUG=true`)
 
 #### Docker
 - **Health Check:** `http://localhost:8000/api/health`
-- **Cookie Debug:** `http://localhost:8000/api/test-cookies`
+- **Cookie Debug:** `http://localhost:8000/api/test-cookies` (requires `DEBUG=true`)
 
 ### Common Development Issues
 
 #### Cookie Authentication
 - **Issue:** Frontend shows "em implementação..." instead of content
 - **Fix:** Ensure no `domain=backend` parameter in cookie (local development)
-- **Debug:** Use `/api/test-cookies` endpoint to verify cookie transmission
+- **Debug:** Use `/api/test-cookies` endpoint to verify cookie transmission (requires `DEBUG=true`; a 404 response means the flag is disabled, not that cookies are broken)
 
 #### Database Seeding
 - **Issue:** No data in database, backend errors
@@ -176,4 +178,4 @@ def seed_database(db: Session) -> None:
     pass
 ```
 
-The seed function runs during FastAPI lifespan startup and is idempotent (skips if data already exists).
+The seed function runs during FastAPI lifespan startup and is idempotent (skips if data already exists). Evaluation questions are additionally **self-correcting** (2026-08-22): on every startup `_correct_questions()` aligns existing rows (title/weight/order by id) with the canonical `CASE_QUESTIONS` list in `app/services/seed.py` (per `docs/case_tecnico.txt`), so legacy databases containing outdated questions (e.g. "Trabalho em Equipe", "Comunicação", "Iniciativa e Proatividade") converge to the case spec without manual deletes.

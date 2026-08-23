@@ -32,7 +32,7 @@ When cookie-based authentication fails or behaves unexpectedly, you need a syste
 
 ## Current Implementation Snapshot
 
-- Dedicated cookie testing endpoint at `/api/test-cookies`
+- Dedicated cookie testing endpoint at `/api/test-cookies` (debug-gated: 404 unless `settings.DEBUG=true`, since it echoes cookies/headers back)
 - Systematic approach to verifying authentication flow
 - CORS configuration for cookie forwarding
 - Frontend API with automatic cookie handling
@@ -58,7 +58,9 @@ A systematic approach to debugging cookie-based authentication issues using dedi
 ```python
 """Health check router."""
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, HTTPException, Request
+
+from app.config import settings
 
 router = APIRouter(tags=["health"])
 
@@ -71,7 +73,9 @@ def health_check():
 
 @router.get("/api/test-cookies")
 def test_cookies(request: Request):
-    """Test endpoint to see what cookies are being sent."""
+    """Debug-only: disabled (404) unless settings.DEBUG=true."""
+    if not settings.DEBUG:
+        raise HTTPException(status_code=404, detail="Not Found")
     cookies = request.cookies
     headers = dict(request.headers)
     
@@ -91,6 +95,7 @@ Key points:
 - Include authentication status analysis
 - Provide CORS-related debugging information
 - Keep endpoint fast and non-blocking
+- **Always gate cookie/header-echoing endpoints behind a DEBUG check** (2026-08-22) — they leak credentials when exposed in non-dev environments
 
 ### Step 2: Verify Backend Authentication Configuration
 
@@ -191,6 +196,8 @@ Key points:
 # Backend health.py
 @router.get("/api/test-cookies")
 def test_cookies(request: Request):
+    if not settings.DEBUG:
+        raise HTTPException(status_code=404, detail="Not Found")
     cookies = request.cookies
     headers = dict(request.headers)
     

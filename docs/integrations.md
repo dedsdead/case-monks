@@ -26,7 +26,7 @@
 
 - **Local Development:** No domain parameter (uses current domain)
 - **Production:** May require specific domain configuration
-- **Debugging:** Use `/api/test-cookies` endpoint to verify cookie transmission
+- **Debugging:** Use `/api/test-cookies` endpoint to verify cookie transmission (requires `DEBUG=true`; returns 404 otherwise)
 
 ### Authorization Rules
 
@@ -45,7 +45,7 @@
 | Method | Path | Description | Request | Response |
 |--------|------|-------------|---------|----------|
 | GET | `/api/health` | Health check | - | `{"status": "ok"}` |
-| GET | `/api/test-cookies` | Debug cookies | - | `{"cookies": {}, "headers": {}}` |
+| GET | `/api/test-cookies` | Debug cookies (**requires `DEBUG=true`, else 404**) | - | `{"cookies": {}, "headers": {}}` |
 
 #### Employees
 
@@ -166,7 +166,7 @@
 **Debug Steps:**
 1. Check backend health: `curl http://localhost:8000/api/health`
 2. Verify database exists: `ls -la repos/backend/data/casetecnico.db`
-3. Test cookie transmission: `curl -b cookies.txt -c cookies.txt http://localhost:8000/api/test-cookies`
+3. Test cookie transmission: `curl -b cookies.txt -c cookies.txt http://localhost:8000/api/test-cookies` (requires `DEBUG=true` in backend `.env`; a 404 means the flag is off, not that cookies are broken)
 
 #### 2. Cookie Authentication Issues
 **Symptom:** User selection not persisting, 401 errors
@@ -176,7 +176,7 @@
 - CORS issues
 
 **Debug Steps:**
-1. Use `/api/test-cookies` to verify cookie transmission
+1. Use `/api/test-cookies` to verify cookie transmission (requires `DEBUG=true`; 404 means the flag is disabled)
 2. Check browser DevTools > Application > Cookies
 3. Verify no `domain=backend` parameter in cookie (local development)
 

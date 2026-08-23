@@ -44,12 +44,13 @@ Plataforma web para avaliação de liderados seguindo hierarquia organizacional.
 
 | Layer | Technology | Version | Purpose |
 |-------|------------|---------|---------|
-| Frontend | React | 18.x | UI framework |
-| Frontend | TypeScript | 5.x | Type safety |
-| Frontend | Vite | 5.x | Build tool + dev server |
-| Frontend | Vitest | 3.x | Unit/integration testing |
+| Frontend | React | 19.x | UI framework |
+| Frontend | TypeScript | 6.x | Type safety |
+| Frontend | Vite | 8.x | Build tool + dev server |
+| Frontend | Vitest | 4.x | Unit/integration testing |
 | Frontend | React Testing Library | 16.x | Component testing utilities |
 | Frontend | Axios | 1.x | HTTP client |
+| Frontend | React Router | 7.x | Client-side routing |
 | Backend | Python | 3.10+ | Runtime |
 | Backend | FastAPI | 0.110+ | Web framework |
 | Backend | SQLAlchemy | 2.x | ORM |
@@ -98,16 +99,17 @@ frontend/
 │   ├── index.css                # CSS custom properties (color palette)
 │   ├── test-setup.ts            # Vitest global test setup (jsdom, testing-library)
 │   ├── i18n/                    # Internationalization (PT-BR / EN)
-│   │   ├── LanguageContext.tsx   # LanguageProvider + useLanguage hook
-│   │   └── translations.ts      # Translation strings for PT-BR and EN
+│   │   ├── LanguageContext.tsx   # LanguageProvider + useLanguage hook; t(key, {param}) interpolation; exports formatScore/formatDate (Intl-based locale formatting)
+│   │   └── translations.ts      # Translation strings for PT-BR and EN (all user-facing text)
 │   ├── pages/                   # Page components
 │   │   ├── Home.tsx             # Home page with subordinate evaluations
 │   │   ├── Evaluate.tsx         # Evaluation form page (Phase 5)
 │   │   ├── History.tsx          # Evaluation history page (Phase 5)
+│   │   ├── GlobalHistory.tsx    # Cross-subordinate evaluation history
 │   │   └── NotFound.tsx         # 404 page with home link
 │   ├── components/
 │   │   ├── layout/              # App shell components
-│   │   │   ├── Layout.tsx       # App shell: header + Outlet (uses useLanguage for translations)
+│   │   │   ├── LayoutWithSidebar.tsx  # App shell: sidebar + header + Outlet (App.tsx imports Layout from here; standalone Layout.tsx was removed 2026-08-22)
 │   │   │   ├── LeaderSelector.tsx  # Identity selection dropdown
 │   │   │   └── LanguageSwitcher.tsx  # PT/EN language toggle buttons
 │   │   ├── employee/            # Employee-related components
@@ -120,6 +122,7 @@ frontend/
 │   │   │   └── EvaluationDetail.tsx
 │   │   └── ui/                  # Shared UI primitives
 │   │       ├── LoadingSpinner.tsx
+│   │       ├── Toast.tsx        # aria-live=polite status/error notifications
 │   │       ├── EmptyState.tsx
 │   │       └── ErrorBoundary.tsx
 │   ├── services/                # API calls
@@ -191,7 +194,7 @@ frontend/
 
 ### Cookie Configuration Invariants
 1. **Local Development:** Never use `domain=backend` parameter in cookies
-2. **Debug Access:** `/api/test-cookies` endpoint available for cookie inspection
+2. **Debug Access:** `/api/test-cookies` endpoint available for cookie inspection — returns 404 unless `settings.DEBUG=true` (`repos/backend/app/routers/health.py`)
 3. **Health Check:** `/api/health` endpoint unauthenticated for service monitoring
 4. **Identity Change:** Automatic redirection on cookie/localStorage changes
 5. **Error Handling:** Comprehensive error messages for authentication failures

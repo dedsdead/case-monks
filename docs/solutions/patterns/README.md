@@ -12,7 +12,7 @@ This documentation captures the reusable patterns that emerged from the recent w
 **Purpose**: Systematic approach to verifying backend health and identifying issues
 
 **Key Components**:
-- Health check endpoints (`/api/health`, `/api/test-cookies`)
+- Health check endpoints (`/api/health`, `/api/test-cookies` — the latter gated behind `DEBUG=true`)
 - Application lifespan with database setup verification
 - Structured logging for debugging operations
 - Manual database setup to avoid migration hang issues

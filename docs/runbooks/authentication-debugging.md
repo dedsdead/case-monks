@@ -32,6 +32,7 @@ python -m uvicorn app.main:app --reload --port 8000
 ### 3. Test Cookie Transmission
 ```bash
 # Test cookies endpoint to see what's being sent
+# Requires DEBUG=true in backend .env — returns 404 when disabled
 curl -b cookies.txt -c cookies.txt http://localhost:8000/api/test-cookies
 
 # Expected response: {"cookies": {}, "headers": {...}}
@@ -70,7 +71,7 @@ curl http://localhost:8000/api/employees
 ## Verification
 - [ ] Backend health check returns 200
 - [ ] Database file exists
-- [ ] `/api/test-cookies` endpoint accessible
+- [ ] `/api/test-cookies` endpoint accessible (with `DEBUG=true`; 404 when the flag is off)
 - [ ] Frontend sets `employee_id` cookie without domain parameter
 - [ ] Employee selection persists across page refreshes
 - [ ] Evaluation and history pages display actual content

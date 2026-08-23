@@ -28,6 +28,9 @@ def health_check():
 ```python
 @router.get("/api/test-cookies")
 def test_cookies(request: Request):
+    """Debug-only: disabled (404) unless settings.DEBUG=true."""
+    if not settings.DEBUG:
+        raise HTTPException(status_code=404, detail="Not Found")
     cookies = request.cookies
     return {"cookies": cookies, "headers": dict(request.headers)}
 ```
@@ -81,6 +84,7 @@ const setEmployeeId = (id: number) => {
 
 2. **Verify Cookie Transmission**
    ```bash
+   # Requires DEBUG=true in backend .env — returns 404 when disabled
    curl -b cookies.txt -c cookies.txt http://localhost:8000/api/test-cookies
    ```
 
@@ -107,6 +111,6 @@ const setEmployeeId = (id: number) => {
 - Keep troubleshooting documentation current
 
 ### Known Limitations
-- Debug endpoints only available in development
+- `/api/test-cookies` only available when `DEBUG=true` (returns 404 otherwise)
 - Cookie behavior varies by browser and privacy settings
 - Database seeding required for full testing
