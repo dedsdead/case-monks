@@ -1,8 +1,8 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
-import { translations, type TranslationKey } from './translations';
+import { translations, type Language, type TranslationKey } from './translations';
 
-export type Language = 'pt-BR' | 'en';
+export type { Language };
 
 export const localeFor: Record<Language, string> = {
   'pt-BR': 'pt-BR',

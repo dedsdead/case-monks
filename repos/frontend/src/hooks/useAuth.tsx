@@ -1,10 +1,12 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useCallback, useContext, useState } from "react";
 import type { ReactNode } from "react";
 
 interface AuthContextValue {
   employeeId: number | null;
   setEmployeeId: (id: number) => void;
   clearEmployee: () => void;
+  /** Clears cookie + localStorage + state without redirecting (session-expiry recovery). */
+  resetEmployee: () => void;
   error: string | null;
 }
 
@@ -98,8 +100,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  /**
+   * Full identity reset without the redirect performed by clearEmployee().
+   * Used on 401 responses so the current render can switch to the
+   * leader-selector prompt instead of resurrecting the rejected id from
+   * the cookie on the next reload.
+   */
+  const resetEmployee = useCallback(() => {
+    try {
+      localStorage.removeItem("employee_id");
+
+      const isProduction = import.meta.env.PROD;
+      document.cookie =
+        "employee_id=; path=/; max-age=0; samesite=Lax; secure=" + isProduction;
+    } catch (error) {
+      console.error("Error resetting authentication data:", error);
+    }
+
+    setEmployeeIdState(null);
+    setError(null);
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ employeeId, setEmployeeId, clearEmployee, error }}>
+    <AuthContext.Provider value={{ employeeId, setEmployeeId, clearEmployee, resetEmployee, error }}>
       {children}
     </AuthContext.Provider>
   );
