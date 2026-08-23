@@ -1,5 +1,11 @@
 import { useState } from "react";
 import type { EvaluationSummary } from "../../types";
+import {
+  useLanguage,
+  formatDate,
+  formatScore,
+  type Language,
+} from "../../i18n/LanguageContext";
 import { EvaluationDetail } from "./EvaluationDetail";
 import { EmptyState } from "../ui/EmptyState";
 
@@ -10,23 +16,22 @@ interface EvaluationHistoryProps {
 
 export function EvaluationHistory({ history, employeeName }: EvaluationHistoryProps) {
   const [expandedId, setExpandedId] = useState<number | null>(null);
+  const { t, language } = useLanguage();
 
   if (history.length === 0) {
-    return (
-      <EmptyState message="Nenhuma avaliação registrada para este funcionário" />
-    );
+    return <EmptyState message={t('noEvaluations')} />;
   }
 
   return (
     <div>
       <h2 style={{ color: "var(--color-primary)", marginBottom: "0.5rem" }}>
-        Histórico — {employeeName}
+        {t('history')} — {employeeName}
       </h2>
       <div style={{ overflowX: "auto" }}>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
             <tr>
-              {["Semana", "Ano", "Data", "Nota", "Ações"].map((h) => (
+              {[t('week'), t('year'), t('date'), t('score'), t('actions')].map((h) => (
                 <th
                   key={h}
                   style={{
@@ -48,6 +53,7 @@ export function EvaluationHistory({ history, employeeName }: EvaluationHistoryPr
               <EvaluationRow
                 key={eval_.id}
                 evaluation={eval_}
+                language={language}
                 isExpanded={expandedId === eval_.id}
                 onToggle={() =>
                   setExpandedId(expandedId === eval_.id ? null : eval_.id)
@@ -63,13 +69,17 @@ export function EvaluationHistory({ history, employeeName }: EvaluationHistoryPr
 
 function EvaluationRow({
   evaluation,
+  language,
   isExpanded,
   onToggle,
 }: {
   evaluation: EvaluationSummary;
+  language: Language;
   isExpanded: boolean;
   onToggle: () => void;
 }) {
+  const { t } = useLanguage();
+
   return (
     <>
       <tr style={{ borderBottom: "1px solid var(--color-border)" }}>
@@ -80,16 +90,17 @@ function EvaluationRow({
           {evaluation.evaluation_year}
         </td>
         <td style={{ padding: "0.75rem", color: "var(--color-muted)" }}>
-          {new Date(evaluation.evaluation_date).toLocaleDateString("pt-BR")}
+          {formatDate(evaluation.evaluation_date, language)}
         </td>
         <td style={{ padding: "0.75rem" }}>
           <span style={{ fontWeight: 600, color: "var(--color-primary)" }}>
-            {evaluation.total_score.toFixed(2)}
+            {formatScore(evaluation.total_score, language)}
           </span>
         </td>
         <td style={{ padding: "0.75rem" }}>
           <button
             onClick={onToggle}
+            aria-expanded={isExpanded}
             style={{
               padding: "0.35rem 0.75rem",
               backgroundColor: isExpanded
@@ -104,7 +115,7 @@ function EvaluationRow({
               fontSize: "0.8rem",
             }}
           >
-            {isExpanded ? "Ocultar" : "Detalhes"}
+            {isExpanded ? t('hideDetails') : t('details')}
           </button>
         </td>
       </tr>

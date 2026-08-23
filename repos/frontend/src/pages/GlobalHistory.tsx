@@ -60,7 +60,8 @@ export function GlobalHistory() {
   };
 
   if (loading) return <LoadingSpinner />;
-  if (evaluations.length === 0) return <EmptyState message="Nenhuma avaliação registrada." />;
+  if (evaluations.length === 0)
+    return <EmptyState message={t('noRegisteredEvaluations')} />;
 
   // Group evaluations by employee
   const employeeHistories = evaluations.map(emp => ({
@@ -88,7 +89,7 @@ export function GlobalHistory() {
             {t('evaluationHistory')}
           </h1>
           <p style={{ color: "var(--color-muted)" }}>
-            {evaluations.length} funcionário(s) avaliados
+            {t('evaluatedEmployeesCount', { count: evaluations.length })}
           </p>
         </div>
         <button

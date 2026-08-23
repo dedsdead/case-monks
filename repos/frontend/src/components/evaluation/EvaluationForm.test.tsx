@@ -92,7 +92,7 @@ describe("EvaluationForm", () => {
     await user.clear(inputs[0]);
     await user.type(inputs[0], "4");
     // Q1: 4 * 25 / 100 = 1.00
-    expect(screen.getByText(/nota parcial.*1\.00/i)).toBeInTheDocument();
+    expect(screen.getByText(/nota parcial.*1[.,]00/i)).toBeInTheDocument();
     expect(screen.getByText(/1 de 6 questões respondidas/i)).toBeInTheDocument();
   });
 

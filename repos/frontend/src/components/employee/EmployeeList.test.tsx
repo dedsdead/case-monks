@@ -2,12 +2,15 @@ import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import { EmployeeList } from "./EmployeeList";
+import { LanguageProvider } from "../../i18n/LanguageContext";
 import type { SubordinateEvaluation } from "../../types";
 
 function renderList(evaluations: SubordinateEvaluation[]) {
   return render(
     <BrowserRouter>
-      <EmployeeList evaluations={evaluations} />
+      <LanguageProvider>
+        <EmployeeList evaluations={evaluations} />
+      </LanguageProvider>
     </BrowserRouter>
   );
 }
@@ -63,7 +66,8 @@ describe("EmployeeList", () => {
 
   it("renders score for evaluated employee", () => {
     renderList(mockEvaluations);
-    expect(screen.getByText("3.40")).toBeInTheDocument();
+    // pt-BR locale formats decimals with comma
+    expect(screen.getByText("3,40")).toBeInTheDocument();
   });
 
   it("renders 'Não avaliado' for unevaluated employee", () => {

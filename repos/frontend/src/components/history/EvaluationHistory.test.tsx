@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { EvaluationHistory } from "./EvaluationHistory";
+import { LanguageProvider } from "../../i18n/LanguageContext";
 import type { EvaluationSummary } from "../../types";
 
 const mockHistory: EvaluationSummary[] = [
@@ -34,7 +35,9 @@ const mockHistory: EvaluationSummary[] = [
 describe("EvaluationHistory", () => {
   it("renders empty state when no history", () => {
     render(
-      <EvaluationHistory history={[]} employeeName="Henry" />,
+      <LanguageProvider>
+        <EvaluationHistory history={[]} employeeName="Henry" />
+      </LanguageProvider>,
     );
     expect(
       screen.getByText(/nenhuma avaliação registrada/i),
@@ -43,15 +46,20 @@ describe("EvaluationHistory", () => {
 
   it("renders evaluation rows", () => {
     render(
-      <EvaluationHistory history={mockHistory} employeeName="Henry" />,
+      <LanguageProvider>
+        <EvaluationHistory history={mockHistory} employeeName="Henry" />
+      </LanguageProvider>,
     );
-    expect(screen.getByText("3.60")).toBeInTheDocument();
-    expect(screen.getByText("3.40")).toBeInTheDocument();
+    // pt-BR locale formats decimals with comma
+    expect(screen.getByText("3,60")).toBeInTheDocument();
+    expect(screen.getByText("3,40")).toBeInTheDocument();
   });
 
   it("renders week and year columns", () => {
     render(
-      <EvaluationHistory history={mockHistory} employeeName="Henry" />,
+      <LanguageProvider>
+        <EvaluationHistory history={mockHistory} employeeName="Henry" />
+      </LanguageProvider>,
     );
     expect(screen.getByText("34")).toBeInTheDocument();
     expect(screen.getByText("33")).toBeInTheDocument();
@@ -60,7 +68,9 @@ describe("EvaluationHistory", () => {
 
   it("expands row to show detail on click", async () => {
     render(
-      <EvaluationHistory history={mockHistory} employeeName="Henry" />,
+      <LanguageProvider>
+        <EvaluationHistory history={mockHistory} employeeName="Henry" />
+      </LanguageProvider>,
     );
     const user = userEvent.setup();
     const expandButtons = screen.getAllByText(/detalhes/i);

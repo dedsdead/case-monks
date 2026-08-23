@@ -1,25 +1,31 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { BrowserRouter, Outlet } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Home } from './Home';
 import { AuthProvider } from '../hooks/useAuth';
 import { LanguageProvider } from '../i18n/LanguageContext';
-import { Layout } from '../components/layout/Layout';
+import { Layout } from '../components/layout/LayoutWithSidebar';
 import * as api from '../services/api';
 
 vi.mock('../services/api');
 
-// Helper component to render Home within Layout
-function renderHome() {
+// Render Home within the real app layout route structure.
+// LayoutWithSidebar renders LeaderSelector (and hides Home) when
+// no identity is set, so tests must authenticate via localStorage.
+function renderHome({ authenticated = true }: { authenticated?: boolean } = {}) {
+  if (authenticated) {
+    localStorage.setItem('employee_id', '1');
+  }
   return render(
     <BrowserRouter>
       <LanguageProvider>
         <AuthProvider>
-          <Layout>
-            <Outlet />
-          </Layout>
-          <Home />
+          <Routes>
+            <Route element={<Layout />}>
+              <Route path="/" element={<Home />} />
+            </Route>
+          </Routes>
         </AuthProvider>
       </LanguageProvider>
     </BrowserRouter>
@@ -138,7 +144,7 @@ describe('Home Page', () => {
     (error401 as any).response = { status: 401 };
     vi.mocked(api.getSubordinateEvaluations).mockRejectedValue(error401);
 
-    renderHome();
+    renderHome({ authenticated: false });
 
     await waitFor(() => {
       expect(screen.getByText(/Selecione sua identidade/i)).toBeInTheDocument();

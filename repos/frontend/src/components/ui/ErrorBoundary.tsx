@@ -1,4 +1,5 @@
 import { Component, type ReactNode } from "react";
+import { translations, type TranslationKey } from "../../i18n/translations";
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -7,6 +8,15 @@ interface ErrorBoundaryProps {
 
 interface ErrorBoundaryState {
   hasError: boolean;
+}
+
+// Class components cannot use the useLanguage hook; read the persisted
+// preference directly (same storage key as LanguageContext).
+function tr(key: TranslationKey): string {
+  const stored = localStorage.getItem("language");
+  const language =
+    stored === "en" || stored === "pt-BR" ? stored : "pt-BR";
+  return translations[language][key] ?? key;
 }
 
 export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
@@ -37,7 +47,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
           }}
         >
           <h2 style={{ color: "var(--color-primary)", marginBottom: "1rem" }}>
-            Algo deu errado
+            {tr('somethingWentWrong')}
           </h2>
           <button
             onClick={() => window.location.reload()}
@@ -51,7 +61,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
               fontSize: "1rem",
             }}
           >
-            Tentar novamente
+            {tr('retry')}
           </button>
         </div>
       );

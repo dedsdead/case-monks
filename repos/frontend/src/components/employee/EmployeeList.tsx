@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import type { SubordinateEvaluation } from "../../types";
+import { useLanguage, formatDate, formatScore } from "../../i18n/LanguageContext";
 
 interface EmployeeListProps {
   evaluations: SubordinateEvaluation[];
@@ -27,6 +28,7 @@ function isEvaluatedThisWeek(
 
 export function EmployeeList({ evaluations }: EmployeeListProps) {
   const navigate = useNavigate();
+  const { t, language } = useLanguage();
 
   if (evaluations.length === 0) {
     return null;
@@ -34,118 +36,122 @@ export function EmployeeList({ evaluations }: EmployeeListProps) {
 
   return (
     <div style={{ animation: 'fadeIn 0.3s ease-in' }}>
-      <table>
-        <thead>
-          <tr>
-            {["Funcionário", "Cargo", "Pontuação", "Data", "Ações"].map(
-              (h) => (
+      <div style={{ overflowX: 'auto' }}>
+        <table>
+          <thead>
+            <tr>
+              {[
+                t('employee'),
+                t('position'),
+                t('score'),
+                t('date'),
+                t('actions'),
+              ].map((h) => (
                 <th key={h}>{h}</th>
-              ),
-            )}
-          </tr>
-        </thead>
-        <tbody>
-          {evaluations.map((e) => {
-            const evaluated = isEvaluatedThisWeek(e.latest_evaluation);
-            return (
-              <tr
-                key={e.employee_id}
-                style={{
-                  transition: "background-color 0.2s ease",
-                  animation: "slideUp 0.3s ease-out",
-                }}
-              >
-                <td>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <span style={{ fontWeight: 600, color: 'var(--color-primary)' }}>
-                      {e.employee_name}
-                    </span>
-                    {e.depth > 0 && (
-                      <span
-                        style={{
-                          fontSize: '0.75rem',
-                          color: 'var(--color-muted)',
-                          padding: '0.2rem 0.5rem',
-                          backgroundColor: 'var(--color-background)',
-                          borderRadius: '4px',
-                          fontWeight: 500,
-                        }}
-                      >
-                        {e.depth === 1 ? 'Direto' : `Nível ${e.depth}`}
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {evaluations.map((e) => {
+              const evaluated = isEvaluatedThisWeek(e.latest_evaluation);
+              return (
+                <tr
+                  key={e.employee_id}
+                  style={{
+                    transition: "background-color 0.2s ease",
+                    animation: "slideUp 0.3s ease-out",
+                  }}
+                >
+                  <td>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <span style={{ fontWeight: 600, color: 'var(--color-primary)' }}>
+                        {e.employee_name}
                       </span>
-                    )}
-                  </div>
-                </td>
-                <td style={{ color: 'var(--color-muted)' }}>
-                  {e.position_name}
-                </td>
-                <td>
-                  {e.latest_evaluation ? (
-                    <span
-                      style={{
-                        fontWeight: 600,
-                        color: 'var(--color-primary)',
-                        fontSize: '1.1rem',
-                      }}
-                    >
-                      {e.latest_evaluation.total_score.toFixed(2)}
-                      {evaluated && (
+                      {e.depth > 0 && (
                         <span
                           style={{
-                            marginLeft: '0.5rem',
                             fontSize: '0.75rem',
-                            backgroundColor: 'var(--color-primary)',
-                            color: 'var(--color-background)',
-                            padding: '0.2rem 0.6rem',
+                            color: 'var(--color-muted)',
+                            padding: '0.2rem 0.5rem',
+                            backgroundColor: 'var(--color-background)',
                             borderRadius: '4px',
-                            fontWeight: 600,
+                            fontWeight: 500,
                           }}
                         >
-                          Avaliado
+                          {e.depth === 1 ? t('direct') : t('level', { level: e.depth })}
                         </span>
                       )}
-                    </span>
-                  ) : (
-                    <span style={{ color: 'var(--color-muted)' }}>
-                      Não avaliado
-                    </span>
-                  )}
-                </td>
-                <td style={{ color: 'var(--color-muted)' }}>
-                  {e.latest_evaluation
-                    ? new Date(
-                        e.latest_evaluation.evaluation_date,
-                      ).toLocaleDateString("pt-BR", {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                      })
-                    : "—"}
-                </td>
-                <td>
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <button
-                      className="btn btn-primary"
-                      onClick={() => navigate(`/evaluate/${e.employee_id}`)}
-                      disabled={evaluated}
-                      aria-label={`Avaliar ${e.employee_name}`}
-                    >
-                      Avaliar
-                    </button>
-                    <button
-                      className="btn btn-secondary"
-                      onClick={() => navigate(`/history/${e.employee_id}`)}
-                      aria-label={`Ver histórico de ${e.employee_name}`}
-                    >
-                      Histórico
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+                    </div>
+                  </td>
+                  <td style={{ color: 'var(--color-muted)' }}>
+                    {e.position_name}
+                  </td>
+                  <td>
+                    {e.latest_evaluation ? (
+                      <span
+                        style={{
+                          fontWeight: 600,
+                          color: 'var(--color-primary)',
+                          fontSize: '1.1rem',
+                        }}
+                      >
+                        {formatScore(e.latest_evaluation.total_score, language)}
+                        {evaluated && (
+                          <span
+                            style={{
+                              marginLeft: '0.5rem',
+                              fontSize: '0.75rem',
+                              backgroundColor: 'var(--color-primary)',
+                              color: 'var(--color-background)',
+                              padding: '0.2rem 0.6rem',
+                              borderRadius: '4px',
+                              fontWeight: 600,
+                            }}
+                          >
+                            {t('evaluatedBadge')}
+                          </span>
+                        )}
+                      </span>
+                    ) : (
+                      <span style={{ color: 'var(--color-muted)' }}>
+                        {t('notEvaluated')}
+                      </span>
+                    )}
+                  </td>
+                  <td style={{ color: 'var(--color-muted)' }}>
+                    {e.latest_evaluation
+                      ? formatDate(e.latest_evaluation.evaluation_date, language, {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
+                        })
+                      : "—"}
+                  </td>
+                  <td>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <button
+                        className="btn btn-primary"
+                        onClick={() => navigate(`/evaluate/${e.employee_id}`)}
+                        disabled={evaluated}
+                        aria-label={t('evaluateEmployee', { name: e.employee_name })}
+                      >
+                        {t('evaluate')}
+                      </button>
+                      <button
+                        className="btn btn-secondary"
+                        onClick={() => navigate(`/history/${e.employee_id}`)}
+                        aria-label={t('viewHistoryFor', { name: e.employee_name })}
+                      >
+                        {t('history')}
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

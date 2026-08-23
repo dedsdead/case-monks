@@ -78,16 +78,16 @@ export function Home() {
     </div>
   );
   if (evaluations.length === 0)
-    return (
-      <EmptyState message="Você não possui subordinados para avaliar." />
-    );
+    return <EmptyState message={t('noSubordinatesMessage')} />;
 
   return (
     <div style={styles.container}>
       <div style={styles.header}>
         <div>
-          <h1 className="page-title">Meus Subordinados</h1>
-          <p className="page-subtitle">{evaluations.length} funcionário(s) na sua hierarquia</p>
+          <h1 className="page-title">{t('subordinatesTitle')}</h1>
+          <p className="page-subtitle">
+            {t('subordinatesCount', { count: evaluations.length })}
+          </p>
         </div>
         <button onClick={handleRefresh} className="btn btn-secondary">
           ↻ {t('refresh')}

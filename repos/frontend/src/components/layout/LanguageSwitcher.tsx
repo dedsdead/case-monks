@@ -8,9 +8,10 @@ export function LanguageSwitcher() {
   };
 
   return (
-    <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+    <div role="group" aria-label={language === 'pt-BR' ? 'Idioma' : 'Language'} style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
       <button
         onClick={() => handleLanguageChange("pt-BR")}
+        aria-pressed={language === "pt-BR"}
         style={{
           padding: "0.25rem 0.5rem",
           border: "1px solid var(--color-border)",
@@ -25,6 +26,7 @@ export function LanguageSwitcher() {
       </button>
       <button
         onClick={() => handleLanguageChange("en")}
+        aria-pressed={language === "en"}
         style={{
           padding: "0.25rem 0.5rem",
           border: "1px solid var(--color-border)",

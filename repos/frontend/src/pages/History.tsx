@@ -147,7 +147,9 @@ export function History() {
             ← {t('back')}
           </button>
           <h1 style={{ color: "var(--color-primary)", margin: 0, fontSize: "1.5rem" }}>
-            {employee ? `Histórico de ${employee.name}` : t('evaluationHistory')}
+            {employee
+              ? t('historyTitle', { name: employee.name })
+              : t('evaluationHistory')}
           </h1>
         </div>
 
@@ -157,7 +159,7 @@ export function History() {
       </div>
 
       {history.length === 0 ? (
-        <EmptyState message="Nenhuma avaliação registrada para este funcionário." />
+        <EmptyState message={t('noEvaluations')} />
       ) : (
         <EvaluationHistory
           history={history}

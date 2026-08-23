@@ -112,7 +112,7 @@ export function Layout() {
                 display: "block",
               }}
             >
-              Avaliações
+              {t('appTitle')}
             </Link>
           )}
         </div>
@@ -187,7 +187,13 @@ export function Layout() {
           {!sidebarOpen && (
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem" }}>
               <LanguageSwitcher />
-              <button onClick={clearEmployee} className="btn btn-secondary" style={{ padding: "0.3rem 0.6rem", fontSize: "0.8rem", borderRadius: "4px" }}>
+              <button
+                onClick={clearEmployee}
+                aria-label={t('selectIdentity')}
+                title={t('selectIdentity')}
+                className="btn btn-secondary"
+                style={{ padding: "0.3rem 0.6rem", fontSize: "0.8rem", borderRadius: "4px" }}
+              >
                 🔄
               </button>
             </div>
@@ -228,8 +234,8 @@ export function Layout() {
             >
               {location.pathname === "/" && t('home')}
               {location.pathname === "/history" && t('evaluationHistory')}
-              {location.pathname.startsWith("/evaluate/") && "Avaliação"}
-              {location.pathname.startsWith("/history/") && "Histórico"}
+              {location.pathname.startsWith("/evaluate/") && t('evaluation')}
+              {location.pathname.startsWith("/history/") && t('history')}
             </h1>
           </div>
           

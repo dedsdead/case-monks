@@ -18,7 +18,8 @@ export const translations = {
     // Authentication
     login: 'Entrar',
     logout: 'Sair',
-    selectIdentity: 'Selecionar identidade',
+    selectIdentity: 'Trocar líder',
+    selectLeaderTitle: 'Selecione sua identidade',
     invalidEmployeeId: 'ID de funcionário inválido',
     employeeNotFound: 'Funcionário não encontrado',
     accessDenied: 'Acesso negado',
@@ -29,6 +30,7 @@ export const translations = {
     position: 'Cargo',
     email: 'E-mail',
     noSubordinates: 'Nenhum subordinado encontrado',
+    noSubordinatesMessage: 'Você não possui subordinados para avaliar.',
     
     // Evaluation
     evaluate: 'Avaliar',
@@ -36,6 +38,7 @@ export const translations = {
     evaluations: 'Avaliações',
     evaluationHistory: 'Histórico de Avaliações',
     noEvaluations: 'Nenhuma avaliação registrada para este funcionário',
+    noRegisteredEvaluations: 'Nenhuma avaliação registrada.',
     submitEvaluation: 'Enviar Avaliação',
     evaluationSubmitted: 'Avaliação enviada com sucesso!',
     evaluationError: 'Erro ao enviar avaliação',
@@ -49,12 +52,53 @@ export const translations = {
     
     // Questions
     questions: 'Perguntas',
+    question: 'Questão',
     score: 'Pontuação',
+    scores: 'Pontuações',
+    
     // History
     history: 'Histórico',
     date: 'Data',
     week: 'Semana',
     year: 'Ano',
+
+    // App / layout
+    appTitle: 'Avaliações',
+    somethingWentWrong: 'Algo deu errado',
+
+    // Subordinates list
+    subordinatesTitle: 'Meus Subordinados',
+    subordinatesCount: '{count} funcionário(s) na sua hierarquia',
+    evaluatedEmployeesCount: '{count} funcionário(s) avaliados',
+    actions: 'Ações',
+    direct: 'Direto',
+    level: 'Nível {level}',
+    evaluatedBadge: 'Avaliado',
+    notEvaluated: 'Não avaliado',
+    evaluateEmployee: 'Avaliar {name}',
+    viewHistoryFor: 'Ver histórico de {name}',
+
+    // Page titles
+    evaluateTitle: 'Avaliação de {name}',
+    historyTitle: 'Histórico de {name}',
+    pageNotFound: 'Página não encontrada',
+    backToHome: 'Voltar para o início',
+
+    // History tables
+    details: 'Detalhes',
+    hideDetails: 'Ocultar',
+    contribution: 'Contribuição',
+    total: 'Total',
+
+    // Leader selector
+    selectEmployeePlaceholder: 'Selecione um funcionário...',
+    loadEmployeesError: 'Falha ao carregar lista de funcionários. Tente novamente.',
+    selectEmployeeRequired: 'Por favor, selecione um funcionário.',
+    authError: 'Falha ao autenticar. Tente novamente.',
+
+    // Confirm dialog
+    confirmSubmitMessage: 'Confirmar envio da avaliação? Esta ação não pode ser desfeita.',
+    
     
     // Errors
     connectionFailed: 'Falha na conexão. Verifique sua internet e tente novamente.',
@@ -84,9 +128,10 @@ export const translations = {
     openMenu: 'Open menu',
     
     // Authentication
-    login: 'Login',
+    login: 'Sign in',
     logout: 'Logout',
-    selectIdentity: 'Select identity',
+    selectIdentity: 'Switch leader',
+    selectLeaderTitle: 'Select your identity',
     invalidEmployeeId: 'Invalid employee ID',
     employeeNotFound: 'Employee not found',
     accessDenied: 'Access denied',
@@ -97,6 +142,7 @@ export const translations = {
     position: 'Position',
     email: 'Email',
     noSubordinates: 'No subordinates found',
+    noSubordinatesMessage: "You don't have any subordinates to evaluate.",
     
     // Evaluation
     evaluate: 'Evaluate',
@@ -104,6 +150,7 @@ export const translations = {
     evaluations: 'Evaluations',
     evaluationHistory: 'Evaluation History',
     noEvaluations: 'No evaluations recorded for this employee',
+    noRegisteredEvaluations: 'No evaluations registered.',
     submitEvaluation: 'Submit Evaluation',
     evaluationSubmitted: 'Evaluation submitted successfully!',
     evaluationError: 'Error submitting evaluation',
@@ -117,6 +164,7 @@ export const translations = {
     
     // Questions
     questions: 'Questions',
+    question: 'Question',
     score: 'Score',
     scores: 'Scores',
     
@@ -125,6 +173,44 @@ export const translations = {
     date: 'Date',
     week: 'Week',
     year: 'Year',
+
+    // App / layout
+    appTitle: 'Evaluations',
+    somethingWentWrong: 'Something went wrong',
+
+    // Subordinates list
+    subordinatesTitle: 'My Subordinates',
+    subordinatesCount: '{count} employee(s) in your hierarchy',
+    evaluatedEmployeesCount: '{count} evaluated employee(s)',
+    actions: 'Actions',
+    direct: 'Direct',
+    level: 'Level {level}',
+    evaluatedBadge: 'Evaluated',
+    notEvaluated: 'Not evaluated',
+    evaluateEmployee: 'Evaluate {name}',
+    viewHistoryFor: 'View history of {name}',
+
+    // Page titles
+    evaluateTitle: 'Evaluation of {name}',
+    historyTitle: 'History of {name}',
+    pageNotFound: 'Page not found',
+    backToHome: 'Back to home',
+
+    // History tables
+    details: 'Details',
+    hideDetails: 'Hide',
+    contribution: 'Contribution',
+    total: 'Total',
+
+    // Leader selector
+    selectEmployeePlaceholder: 'Select an employee...',
+    loadEmployeesError: 'Failed to load employee list. Please try again.',
+    selectEmployeeRequired: 'Please select an employee.',
+    authError: 'Authentication failed. Please try again.',
+
+    // Confirm dialog
+    confirmSubmitMessage: 'Confirm evaluation submission? This action cannot be undone.',
+    
     
     // Errors
     connectionFailed: 'Connection failed. Check your internet and try again.',

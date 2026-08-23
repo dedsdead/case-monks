@@ -151,7 +151,7 @@ export function Evaluate() {
               ← {t('back')}
             </button>
             <h1 style={{ color: "var(--color-primary)", margin: 0 }}>
-              Avaliação de {employee.name}
+              {t('evaluateTitle', { name: employee.name })}
             </h1>
           </div>
 

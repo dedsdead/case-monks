@@ -3,6 +3,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { AuthProvider } from "../../hooks/useAuth";
+import { LanguageProvider } from "../../i18n/LanguageContext";
 import { LeaderSelector } from "./LeaderSelector";
 import * as api from "../../services/api";
 
@@ -21,9 +22,11 @@ beforeEach(() => {
 function renderSelector() {
   return render(
     <MemoryRouter>
-      <AuthProvider>
-        <LeaderSelector />
-      </AuthProvider>
+      <LanguageProvider>
+        <AuthProvider>
+          <LeaderSelector />
+        </AuthProvider>
+      </LanguageProvider>
     </MemoryRouter>,
   );
 }

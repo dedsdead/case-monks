@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { EvaluationDetail } from "./EvaluationDetail";
+import { LanguageProvider } from "../../i18n/LanguageContext";
 import type { EvaluationSummary } from "../../types";
 
 const mockSummary: EvaluationSummary = {
@@ -22,8 +23,16 @@ const mockSummary: EvaluationSummary = {
 };
 
 describe("EvaluationDetail", () => {
+  function renderDetail() {
+    return render(
+      <LanguageProvider>
+        <EvaluationDetail summary={mockSummary} />
+      </LanguageProvider>,
+    );
+  }
+
   it("renders all question titles", () => {
-    render(<EvaluationDetail summary={mockSummary} />);
+    renderDetail();
     expect(screen.getByText("Entrega de Resultados")).toBeInTheDocument();
     expect(screen.getByText("Execução e Qualidade")).toBeInTheDocument();
     expect(screen.getByText("Capacidade de Aprendizado")).toBeInTheDocument();
@@ -33,14 +42,14 @@ describe("EvaluationDetail", () => {
   });
 
   it("renders scores using getAllByText for duplicates", () => {
-    render(<EvaluationDetail summary={mockSummary} />);
+    renderDetail();
     expect(screen.getAllByText("4")).toHaveLength(3);
     expect(screen.getAllByText("3")).toHaveLength(2);
     expect(screen.getByText("2")).toBeInTheDocument();
   });
 
   it("renders weights using getAllByText for duplicates", () => {
-    render(<EvaluationDetail summary={mockSummary} />);
+    renderDetail();
     expect(screen.getByText("25")).toBeInTheDocument();
     expect(screen.getAllByText("20")).toHaveLength(2);
     expect(screen.getByText("15")).toBeInTheDocument();
@@ -48,16 +57,17 @@ describe("EvaluationDetail", () => {
   });
 
   it("renders weighted contributions", () => {
-    render(<EvaluationDetail summary={mockSummary} />);
-    expect(screen.getByText("1.00")).toBeInTheDocument();
-    expect(screen.getByText("0.60")).toBeInTheDocument();
-    expect(screen.getByText("0.80")).toBeInTheDocument();
-    expect(screen.getAllByText("0.30")).toHaveLength(2);
-    expect(screen.getByText("0.40")).toBeInTheDocument();
+    renderDetail();
+    // pt-BR locale formats decimals with comma
+    expect(screen.getByText("1,00")).toBeInTheDocument();
+    expect(screen.getByText("0,60")).toBeInTheDocument();
+    expect(screen.getByText("0,80")).toBeInTheDocument();
+    expect(screen.getAllByText("0,30")).toHaveLength(2);
+    expect(screen.getByText("0,40")).toBeInTheDocument();
   });
 
   it("renders total score", () => {
-    render(<EvaluationDetail summary={mockSummary} />);
-    expect(screen.getByText("3.40")).toBeInTheDocument();
+    renderDetail();
+    expect(screen.getByText("3,40")).toBeInTheDocument();
   });
 });

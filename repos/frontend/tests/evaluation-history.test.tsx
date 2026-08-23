@@ -57,7 +57,8 @@ describe("Evaluation History Functionality", () => {
       expect(screen.getByText("Histórico de John Doe")).toBeInTheDocument();
     });
 
-    expect(screen.getByText("3.50")).toBeInTheDocument();
+    // pt-BR locale formats decimals with comma
+    expect(screen.getByText("3,50")).toBeInTheDocument();
     expect(screen.getByText(new Date().getFullYear().toString())).toBeInTheDocument();
     expect(screen.getByText(/voltar/i)).toBeInTheDocument();
   });
