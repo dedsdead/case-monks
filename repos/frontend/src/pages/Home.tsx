@@ -38,7 +38,7 @@ export function Home() {
           }
         });
     },
-    [t, resetEmployee]
+    [resetEmployee, t]
   );
 
   useEffect(() => {

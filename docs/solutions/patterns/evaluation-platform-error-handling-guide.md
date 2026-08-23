@@ -459,6 +459,8 @@ export function EvaluationForm() {
 
 **Key Invariant**: All user-facing strings must use translation keys, not hardcoded text. This ensures consistent language support across the application.
 
+**Performance Optimization**: The `t` function is a simple function that depends on the current `language` state. When using `t` in hooks like `useEffect` or `useCallback`, include `t` in the dependency array to ensure stale translations don't occur during language changes. This prevents race conditions where async operations complete with outdated language context.
+
 ### 4. Authentication Pattern
 **Principle**: Validate and handle authentication state at every step.
 

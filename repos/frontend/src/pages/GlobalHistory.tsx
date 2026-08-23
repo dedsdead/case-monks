@@ -46,7 +46,7 @@ export function GlobalHistory() {
           }
         });
     },
-    [t, resetEmployee]
+    [resetEmployee, t]
   );
 
   useEffect(() => {

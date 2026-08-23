@@ -103,7 +103,7 @@ frontend/
 │   ├── index.css                # Tailwind v4 CSS-first theme: oklch design tokens, @theme inline mapping, base-layer touch-target rule
 │   ├── test-setup.ts            # Vitest global test setup (jsdom, testing-library, matchMedia/ResizeObserver/PointerEvent polyfills)
 │   ├── i18n/                    # Internationalization (PT-BR / EN)
-│   │   ├── LanguageContext.tsx   # LanguageProvider + useLanguage hook; t(key, {param}) interpolation; exports formatScore/formatDate (Intl-based locale formatting)
+│   │   ├── LanguageContext.tsx   # LanguageProvider + useLanguage hook; memoized t(key, {param}) interpolation using useMemo([language]); exports formatScore/formatDate (Intl-based locale formatting)
 │   │   └── translations.ts      # Translation strings for PT-BR and EN (all user-facing text)
 │   ├── pages/                   # Page components
 │   │   ├── Home.tsx             # Home page with subordinate evaluations

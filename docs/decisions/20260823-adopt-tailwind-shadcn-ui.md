@@ -36,8 +36,28 @@ Adopt Tailwind CSS v4 (CSS-first configuration, no `tailwind.config.js`) plus sh
 ### Negative
 - Reverses the plan's "no external library" constraint — bundle grows (Radix, lucide)
 - `size="sm"` buttons render ≥44px tall because the touch-target rule intentionally exempts only icon sizes (accessibility-first trade-off)
-- Vendored `sheet.tsx` ships a hardcoded English sr-only "Close" label (known gap)
+- Vendored `sheet.tsx` ships a hardcoded English sr-only "Close" label (known gap; documented below)
 - Unused `--chart-*`/`--warning` tokens kept per stock template convention
+
+### Known Limitations
+
+#### sheet.tsx:78 Hardcoded English "Close" Label
+**Issue:** The vendored `src/components/ui/sheet.tsx` contains a hardcoded English sr-only "Close" label at line 78:
+```tsx
+<span className="sr-only">Close</span>
+```
+
+**Impact:** This label is accessible to screen reader users when the sheet is open on mobile devices, but it's always in English regardless of the app's current language setting.
+
+**Resolution:** This is documented as a known limitation rather than fixed because:
+1. **Policy violation:** Editing vendored stock primitives would break the "stock for CLI diffs" principle
+2. **Low impact:** The label is sr-only (screen reader only) and in a rarely-used mobile drawer
+3. **Trade-off:** Maintaining diffability with shadcn CLI updates is prioritized over this edge case
+
+**Future options:**
+- Wait for shadcn/ui to provide i18n support for built-in labels
+- Create a custom sheet component wrapping the stock primitive (complex for this edge case)
+- Accept the limitation as-is for this demo application
 
 ## References
 

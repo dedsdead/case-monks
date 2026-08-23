@@ -78,7 +78,7 @@ export function History() {
           if (!controller.signal.aborted) setLoading(false);
         });
     },
-    [employeeId, t]
+    [employeeId, t, resetEmployee]
   );
 
   useEffect(() => {

@@ -5,6 +5,7 @@ import { useAuth } from "../../hooks/useAuth";
 import { useLanguage } from "../../i18n/LanguageContext";
 import { LeaderSelector } from "./LeaderSelector";
 import { LanguageSwitcher } from "./LanguageSwitcher";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Separator } from "@/components/ui/separator";
 import {
   Sidebar,
@@ -119,7 +120,10 @@ export function Layout() {
                 >
                   #{employeeId}
                 </span>
-                <LanguageSwitcher />
+                <div className="flex items-center gap-1">
+                  <LanguageSwitcher />
+                  <ThemeToggle />
+                </div>
               </div>
             </SidebarMenuItem>
             <SidebarMenuItem>

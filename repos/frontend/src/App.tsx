@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./hooks/useAuth";
 import { LanguageProvider } from "./i18n/LanguageContext";
+import { ThemeProvider } from "./contexts/ThemeContext";
 import { ErrorBoundary } from "./components/ui/ErrorBoundary";
 import { Layout } from "./components/layout/LayoutWithSidebar";
 import { Home } from "./pages/Home";
@@ -12,21 +13,23 @@ import { NotFound } from "./pages/NotFound";
 export default function App() {
   return (
     <LanguageProvider>
-      <ErrorBoundary>
-        <AuthProvider>
-          <BrowserRouter>
-            <Routes>
-              <Route element={<Layout />}>
-                <Route path="/" element={<Home />} />
-                <Route path="/evaluate/:employeeId" element={<Evaluate />} />
-                <Route path="/history/:employeeId" element={<History />} />
-                <Route path="/history" element={<GlobalHistory />} />
-              </Route>
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </AuthProvider>
-      </ErrorBoundary>
+      <ThemeProvider>
+        <ErrorBoundary>
+          <AuthProvider>
+            <BrowserRouter>
+              <Routes>
+                <Route element={<Layout />}>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/evaluate/:employeeId" element={<Evaluate />} />
+                  <Route path="/history/:employeeId" element={<History />} />
+                  <Route path="/history" element={<GlobalHistory />} />
+                </Route>
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </AuthProvider>
+        </ErrorBoundary>
+      </ThemeProvider>
     </LanguageProvider>
   );
 }
