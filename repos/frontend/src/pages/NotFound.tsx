@@ -1,33 +1,22 @@
 import { Link } from "react-router-dom";
+import { Compass } from "lucide-react";
 import { useLanguage } from "../i18n/LanguageContext";
+import { Button } from "@/components/ui/button";
 
 export function NotFound() {
   const { t } = useLanguage();
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "3rem 1rem",
-        textAlign: "center",
-      }}
-    >
-      <h1 style={{ color: "var(--color-primary)", marginBottom: "1rem" }}>
+    <div className="flex min-h-svh flex-col items-center justify-center gap-6 p-6 text-center">
+      <span className="flex size-20 items-center justify-center rounded-full bg-muted text-muted-foreground">
+        <Compass className="size-10" />
+      </span>
+      <h1 className="text-4xl font-bold tracking-tight text-foreground">
         {t('pageNotFound')}
       </h1>
-      <Link
-        to="/"
-        style={{
-          color: "var(--color-primary)",
-          textDecoration: "underline",
-          fontSize: "1.1rem",
-        }}
-      >
-        {t('backToHome')}
-      </Link>
+      <Button asChild variant="outline" size="lg">
+        <Link to="/">{t('backToHome')}</Link>
+      </Button>
     </div>
   );
 }
