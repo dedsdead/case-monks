@@ -14,7 +14,10 @@ from app.services.evaluation import (
     get_evaluation_history,
     get_subordinate_evaluations,
 )
+from unittest.mock import patch
 # from app.services.hierarchy import clear_cache  # Not needed
+
+SCORES = [ScoreInput(question_id=i, score=3) for i in range(1, 7)]
 
 
 @pytest.fixture
@@ -146,3 +149,35 @@ class TestGetEvaluationHistory:
         result = get_evaluation_history(db_session, 1, 2)
         assert len(result) == 1
         assert result[0].employee_id == 2
+
+
+class TestWeeklyLimitCrossWeek:
+    def test_weekly_limit_allows_different_week_in_same_year(self, db_session, seed_evaluation_data):
+        """AC-22: Different week in the same year should be allowed."""
+        # Mock get_current_iso_week to return week 33
+        with patch('app.services.evaluation.get_current_iso_week', return_value=(2026, 33)):
+            # First submission
+            eval1 = create_evaluation(db_session, 1, EvaluationCreate(employee_id=2, scores=SCORES))
+            assert eval1 is not None
+
+        # Mock get_current_iso_week to return week 34
+        with patch('app.services.evaluation.get_current_iso_week', return_value=(2026, 34)):
+            # Second submission for same employee in different week
+            eval2 = create_evaluation(db_session, 1, EvaluationCreate(employee_id=2, scores=SCORES))
+            assert eval2 is not None
+
+        assert eval1.id != eval2.id
+
+    def test_weekly_limit_allows_different_week_across_year_boundary(self, db_session, seed_evaluation_data):
+        """AC-42: Submission in week 52 of 2026 and week 1 of 2027 should both succeed."""
+        # Mock week 52 of 2026
+        with patch('app.services.evaluation.get_current_iso_week', return_value=(2026, 52)):
+            eval_week_52 = create_evaluation(db_session, 1, EvaluationCreate(employee_id=2, scores=SCORES))
+            assert eval_week_52 is not None
+
+        # Mock week 1 of 2027
+        with patch('app.services.evaluation.get_current_iso_week', return_value=(2027, 1)):
+            eval_week_1 = create_evaluation(db_session, 1, EvaluationCreate(employee_id=2, scores=SCORES))
+            assert eval_week_1 is not None
+
+        assert eval_week_52.id != eval_week_1.id
