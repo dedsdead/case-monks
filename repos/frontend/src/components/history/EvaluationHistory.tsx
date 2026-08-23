@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import type { EvaluationSummary } from "../../types";
 import {
   useLanguage,
@@ -8,6 +9,21 @@ import {
 } from "../../i18n/LanguageContext";
 import { EvaluationDetail } from "./EvaluationDetail";
 import { EmptyState } from "../ui/EmptyState";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 interface EvaluationHistoryProps {
   history: EvaluationSummary[];
@@ -23,47 +39,41 @@ export function EvaluationHistory({ history, employeeName }: EvaluationHistoryPr
   }
 
   return (
-    <div>
-      <h2 style={{ color: "var(--color-primary)", marginBottom: "0.5rem" }}>
-        {t('history')} — {employeeName}
-      </h2>
-      <div style={{ overflowX: "auto" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead>
-            <tr>
-              {[t('week'), t('year'), t('date'), t('score'), t('actions')].map((h) => (
-                <th
-                  key={h}
-                  style={{
-                    textAlign: "left",
-                    padding: "0.75rem",
-                    borderBottom: "2px solid var(--color-border)",
-                    color: "var(--color-primary)",
-                    fontWeight: 600,
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {h}
-                </th>
+    <Card className="gap-0 overflow-hidden py-0">
+      <CardHeader className="border-b px-4 py-4 [.border-b]:pb-4 md:px-6">
+        <CardTitle className="text-base md:text-lg">
+          {t('history')} — {employeeName}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="p-0">
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>{t('week')}</TableHead>
+                <TableHead>{t('year')}</TableHead>
+                <TableHead>{t('date')}</TableHead>
+                <TableHead>{t('score')}</TableHead>
+                <TableHead className="text-right">{t('actions')}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {history.map((eval_) => (
+                <EvaluationRow
+                  key={eval_.id}
+                  evaluation={eval_}
+                  language={language}
+                  isExpanded={expandedId === eval_.id}
+                  onToggle={() =>
+                    setExpandedId(expandedId === eval_.id ? null : eval_.id)
+                  }
+                />
               ))}
-            </tr>
-          </thead>
-          <tbody>
-            {history.map((eval_) => (
-              <EvaluationRow
-                key={eval_.id}
-                evaluation={eval_}
-                language={language}
-                isExpanded={expandedId === eval_.id}
-                onToggle={() =>
-                  setExpandedId(expandedId === eval_.id ? null : eval_.id)
-                }
-              />
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
+            </TableBody>
+          </Table>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -82,49 +92,41 @@ function EvaluationRow({
 
   return (
     <>
-      <tr style={{ borderBottom: "1px solid var(--color-border)" }}>
-        <td style={{ padding: "0.75rem", color: "var(--color-primary)" }}>
+      <TableRow>
+        <TableCell className="font-medium tabular-nums">
           {evaluation.week_number}
-        </td>
-        <td style={{ padding: "0.75rem", color: "var(--color-muted)" }}>
+        </TableCell>
+        <TableCell className="tabular-nums text-muted-foreground">
           {evaluation.evaluation_year}
-        </td>
-        <td style={{ padding: "0.75rem", color: "var(--color-muted)" }}>
+        </TableCell>
+        <TableCell className="whitespace-nowrap text-muted-foreground">
           {formatDate(evaluation.evaluation_date, language)}
-        </td>
-        <td style={{ padding: "0.75rem" }}>
-          <span style={{ fontWeight: 600, color: "var(--color-primary)" }}>
+        </TableCell>
+        <TableCell>
+          <span className="font-semibold tabular-nums text-primary">
             {formatScore(evaluation.total_score, language)}
           </span>
-        </td>
-        <td style={{ padding: "0.75rem" }}>
-          <button
-            onClick={onToggle}
-            aria-expanded={isExpanded}
-            style={{
-              padding: "0.35rem 0.75rem",
-              backgroundColor: isExpanded
-                ? "var(--color-primary)"
-                : "var(--color-border)",
-              color: isExpanded
-                ? "var(--color-background)"
-                : "var(--color-primary)",
-              border: "none",
-              borderRadius: "4px",
-              cursor: "pointer",
-              fontSize: "0.8rem",
-            }}
-          >
-            {isExpanded ? t('hideDetails') : t('details')}
-          </button>
-        </td>
-      </tr>
+        </TableCell>
+        <TableCell>
+          <div className="flex justify-end">
+            <Button
+              size="sm"
+              variant={isExpanded ? "default" : "outline"}
+              onClick={onToggle}
+              aria-expanded={isExpanded}
+            >
+              {isExpanded ? <ChevronUp /> : <ChevronDown />}
+              {isExpanded ? t('hideDetails') : t('details')}
+            </Button>
+          </div>
+        </TableCell>
+      </TableRow>
       {isExpanded && (
-        <tr>
-          <td colSpan={5}>
+        <TableRow className="hover:bg-transparent">
+          <TableCell colSpan={5} className="bg-muted/40 p-0">
             <EvaluationDetail summary={evaluation} />
-          </td>
-        </tr>
+          </TableCell>
+        </TableRow>
       )}
     </>
   );
