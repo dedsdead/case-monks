@@ -51,6 +51,10 @@ Plataforma web para avaliação de liderados seguindo hierarquia organizacional.
 | Frontend | React Testing Library | 16.x | Component testing utilities |
 | Frontend | Axios | 1.x | HTTP client |
 | Frontend | React Router | 7.x | Client-side routing |
+| Frontend | Tailwind CSS | 4.x | Utility-first styling (CSS-first theme in src/index.css) |
+| Frontend | shadcn/ui | vendored | UI primitives (src/components/ui/, stock for CLI diffs) |
+| Frontend | radix-ui | 1.x | Headless accessible component behavior |
+| Frontend | lucide-react | 1.x | Icon set |
 | Backend | Python | 3.10+ | Runtime |
 | Backend | FastAPI | 0.110+ | Web framework |
 | Backend | SQLAlchemy | 2.x | ORM |
@@ -96,8 +100,8 @@ frontend/
 ├── src/
 │   ├── main.tsx                 # App entrypoint (wraps in LanguageProvider + AuthProvider + ErrorBoundary)
 │   ├── App.tsx                  # React Router setup
-│   ├── index.css                # CSS custom properties (color palette)
-│   ├── test-setup.ts            # Vitest global test setup (jsdom, testing-library)
+│   ├── index.css                # Tailwind v4 CSS-first theme: oklch design tokens, @theme inline mapping, base-layer touch-target rule
+│   ├── test-setup.ts            # Vitest global test setup (jsdom, testing-library, matchMedia/ResizeObserver/PointerEvent polyfills)
 │   ├── i18n/                    # Internationalization (PT-BR / EN)
 │   │   ├── LanguageContext.tsx   # LanguageProvider + useLanguage hook; t(key, {param}) interpolation; exports formatScore/formatDate (Intl-based locale formatting)
 │   │   └── translations.ts      # Translation strings for PT-BR and EN (all user-facing text)
@@ -109,9 +113,9 @@ frontend/
 │   │   └── NotFound.tsx         # 404 page with home link
 │   ├── components/
 │   │   ├── layout/              # App shell components
-│   │   │   ├── LayoutWithSidebar.tsx  # App shell: sidebar + header + Outlet (App.tsx imports Layout from here; standalone Layout.tsx was removed 2026-08-22)
-│   │   │   ├── LeaderSelector.tsx  # Identity selection dropdown
-│   │   │   └── LanguageSwitcher.tsx  # PT/EN language toggle buttons
+│   │   │   ├── LayoutWithSidebar.tsx  # App shell: shadcn Sidebar (collapsible=icon) + header + Outlet (App.tsx imports Layout from here; standalone Layout.tsx was removed 2026-08-22)
+│   │   │   ├── LeaderSelector.tsx  # Identity selection card (native select keeps combobox semantics)
+│   │   │   └── LanguageSwitcher.tsx  # PT/EN dropdown menu (menuitemradio items)
 │   │   ├── employee/            # Employee-related components
 │   │   │   └── EmployeeList.tsx # Subordinate table with action buttons
 │   │   ├── evaluation/          # Evaluation form components (Phase 5)
@@ -124,15 +128,21 @@ frontend/
 │   │       ├── LoadingSpinner.tsx
 │   │       ├── Toast.tsx        # aria-live=polite status/error notifications
 │   │       ├── EmptyState.tsx
-│   │       └── ErrorBoundary.tsx
+│   │       ├── ErrorBoundary.tsx
+│   │       └── (shadcn)         # Vendored stock primitives: button, card, table, badge, input, separator, tooltip, sheet, sidebar, dropdown-menu, skeleton
+│   ├── lib/                     # Framework-agnostic helpers
+│   │   ├── utils.ts             # cn() class merger (clsx + tailwind-merge)
+│   │   └── http.ts              # getResponseStatus(error) typed axios error status reader
 │   ├── services/                # API calls
 │   │   └── api.ts               # Axios instance with cookie auth interceptor
 │   ├── types/                   # TypeScript types
 │   │   └── index.ts             # Interfaces matching backend schemas
 │   └── hooks/                   # Custom hooks
-│       └── useAuth.tsx          # Auth context (AuthProvider + useAuth)
+│       ├── useAuth.tsx          # Auth context (AuthProvider + useAuth)
+│       └── use-mobile.ts        # Viewport breakpoint hook (drives Sidebar mobile sheet)
 ├── package.json
-├── vite.config.ts               # Vite config with /api proxy + Vitest config
+├── components.json              # shadcn CLI configuration
+├── vite.config.ts               # Vite config with /api proxy + @tailwindcss/vite + Vitest config
 ├── tsconfig.app.json            # TypeScript config (excludes test files)
 └── Dockerfile
 ```
