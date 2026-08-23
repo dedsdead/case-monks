@@ -85,6 +85,55 @@ class TestSeedDatabase:
             total_weight = sum(q.weight for q in questions)
             assert total_weight == 100
 
+    def test_seed_questions_match_case_spec(self, tmp_path):
+        """Seed questions must match docs/case_tecnico.txt titles and weights."""
+        from app.services.seed import seed_database
+        engine = create_engine(f"sqlite:///{tmp_path / 'test.db'}", connect_args={"check_same_thread": False})
+        Base.metadata.create_all(engine)
+        with Session(engine) as session:
+            seed_database(session)
+            questions = session.query(EvaluationQuestion).order_by(EvaluationQuestion.id).all()
+            expected = [
+                (1, "Entrega de Resultados", 25),
+                (2, "Execução e Qualidade do Trabalho", 20),
+                (3, "Capacidade de Aprendizado e Desenvolvimento", 20),
+                (4, "Resolução de Problemas e Pensamento Crítico", 15),
+                (5, "Colaboração, Influência e Liderança", 10),
+                (6, "Visão Estratégica e Potencial de Crescimento", 10),
+            ]
+            assert [(q.id, q.title, int(q.weight)) for q in questions] == expected
+
+    def test_seed_corrects_outdated_question_rows(self, tmp_path):
+        """Seed should update existing question rows that deviate from the case spec."""
+        from app.services.seed import seed_database
+        engine = create_engine(f"sqlite:///{tmp_path / 'test.db'}", connect_args={"check_same_thread": False})
+        Base.metadata.create_all(engine)
+        with Session(engine) as session:
+            session.add_all(
+                [
+                    EvaluationQuestion(id=1, title="Entrega de Resultados", weight=25, order=1),
+                    EvaluationQuestion(id=2, title="Trabalho em Equipe", weight=20, order=2),
+                    EvaluationQuestion(id=3, title="Comunicação", weight=15, order=3),
+                    EvaluationQuestion(id=4, title="Iniciativa e Proatividade", weight=15, order=4),
+                    EvaluationQuestion(id=5, title="Resolução de Problemas", weight=15, order=5),
+                    EvaluationQuestion(id=6, title="Liderança e Influência", weight=10, order=6),
+                ]
+            )
+            session.commit()
+
+            seed_database(session)
+
+            questions = {q.id: q for q in session.query(EvaluationQuestion).all()}
+            assert questions[2].title == "Execução e Qualidade do Trabalho"
+            assert int(questions[2].weight) == 20
+            assert questions[3].title == "Capacidade de Aprendizado e Desenvolvimento"
+            assert int(questions[3].weight) == 20
+            assert questions[5].title == "Colaboração, Influência e Liderança"
+            assert int(questions[5].weight) == 10
+            assert questions[6].title == "Visão Estratégica e Potencial de Crescimento"
+            # No duplication from the correcting pass
+            assert session.query(EvaluationQuestion).count() == 6
+
     def test_seed_leader_lead_has_no_self_leads(self, tmp_path):
         """Seed should not create any self-referencing leader_lead."""
         from app.services.seed import seed_database

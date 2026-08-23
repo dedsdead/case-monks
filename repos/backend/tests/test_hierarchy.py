@@ -80,3 +80,14 @@ class TestIsAncestorOf:
 
     def test_returns_false_for_self(self, db_session, seed_hierarchy):
         assert is_ancestor_of(db_session, 1, 1) is False
+
+
+class TestHierarchyNoSuperiors:
+    def test_hierarchy_excludes_superiors(self, db_session, seed_hierarchy):
+        """AC-35: No superiors should appear in the subordinate list."""
+        result = get_all_subordinates(db_session, 1)
+        assert 1 not in result  # No self
+        assert 2 in result  # Bob - direct
+        assert 4 in result  # Dave - direct
+        assert 3 in result  # Charlie - indirect via Bob
+        assert len(result) == 3

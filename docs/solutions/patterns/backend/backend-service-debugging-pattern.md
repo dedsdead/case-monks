@@ -30,7 +30,7 @@ When developing or debugging FastAPI applications, you need a systematic approac
 ## Current Implementation Snapshot
 
 - Health check endpoint at `/api/health` returns basic service status
-- Cookie testing endpoint at `/api/test-cookies` shows what cookies are being sent
+- Cookie testing endpoint at `/api/test-cookies` shows what cookies are being sent (debug-gated: 404 unless `settings.DEBUG=true`, since it echoes cookies/headers back)
 - Application lifespan includes database setup verification
 - Structured logging for database operations and seeding
 - Manual database setup script for avoiding migration hang issues
@@ -55,7 +55,9 @@ A systematic approach to debugging FastAPI backend services using dedicated heal
 ```python
 """Health check router."""
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, HTTPException, Request
+
+from app.config import settings
 
 router = APIRouter(tags=["health"])
 
@@ -68,7 +70,13 @@ def health_check():
 
 @router.get("/api/test-cookies")
 def test_cookies(request: Request):
-    """Test endpoint to see what cookies are being sent."""
+    """Test endpoint to see what cookies are being sent.
+
+    Debug-only: disabled (404) unless DEBUG=true, because it echoes
+    cookies and headers back to the caller.
+    """
+    if not settings.DEBUG:
+        raise HTTPException(status_code=404, detail="Not Found")
     cookies = request.cookies
     return {"cookies": cookies, "headers": dict(request.headers)}
 ```
@@ -76,6 +84,7 @@ def test_cookies(request: Request):
 Key points:
 - Always include basic health check for service availability
 - Add debugging endpoints for specific issues (cookies, headers, etc.)
+- Gate any endpoint that reflects cookies/headers behind a DEBUG check — it must never be exposed in non-dev environments (2026-08-22)
 - Use descriptive tags for better API documentation
 
 ### Step 2: Configure Application Lifespan
@@ -143,7 +152,8 @@ app = FastAPI(
 app.include_router(health.router)
 
 # health.py
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, HTTPException, Request
+from app.config import settings
 
 router = APIRouter(tags=["health"])
 
@@ -153,6 +163,8 @@ def health_check():
 
 @router.get("/api/test-cookies")
 def test_cookies(request: Request):
+    if not settings.DEBUG:
+        raise HTTPException(status_code=404, detail="Not Found")
     cookies = request.cookies
     return {"cookies": cookies, "headers": dict(request.headers)}
 ```

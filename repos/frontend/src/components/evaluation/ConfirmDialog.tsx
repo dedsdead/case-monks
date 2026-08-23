@@ -1,3 +1,6 @@
+import { useEffect, useRef } from "react";
+import { useLanguage } from "../../i18n/LanguageContext";
+
 interface ConfirmDialogProps {
   isOpen: boolean;
   onConfirm: () => void;
@@ -9,6 +12,48 @@ export function ConfirmDialog({
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
+  const { t } = useLanguage();
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+  const previouslyFocused = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    previouslyFocused.current = document.activeElement as HTMLElement | null;
+    const dialog = dialogRef.current;
+    dialog?.querySelector<HTMLButtonElement>("button")?.focus();
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        onCancel();
+        return;
+      }
+      if (event.key !== "Tab" || !dialog) return;
+
+      const focusable = Array.from(
+        dialog.querySelectorAll<HTMLElement>("button"),
+      );
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      previouslyFocused.current?.focus();
+    };
+  }, [isOpen, onCancel]);
+
   if (!isOpen) return null;
 
   return (
@@ -24,6 +69,10 @@ export function ConfirmDialog({
       }}
     >
       <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="confirm-dialog-message"
         style={{
           backgroundColor: "var(--color-background)",
           borderRadius: "8px",
@@ -34,6 +83,7 @@ export function ConfirmDialog({
         }}
       >
         <p
+          id="confirm-dialog-message"
           style={{
             color: "var(--color-primary)",
             fontSize: "1rem",
@@ -41,7 +91,7 @@ export function ConfirmDialog({
             lineHeight: 1.5,
           }}
         >
-          Confirmar envio da avaliação? Esta ação não pode ser desfeita.
+          {t('confirmSubmitMessage')}
         </p>
         <div style={{ display: "flex", gap: "0.75rem", justifyContent: "flex-end" }}>
           <button
@@ -56,10 +106,11 @@ export function ConfirmDialog({
               fontSize: "0.9rem",
             }}
           >
-            Cancelar
+            {t('cancel')}
           </button>
           <button
             onClick={onConfirm}
+            autoFocus
             style={{
               padding: "0.5rem 1.25rem",
               backgroundColor: "var(--color-primary)",
@@ -71,7 +122,7 @@ export function ConfirmDialog({
               fontWeight: 600,
             }}
           >
-            Confirmar
+            {t('confirm')}
           </button>
         </div>
       </div>

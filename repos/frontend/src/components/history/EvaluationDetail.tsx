@@ -1,16 +1,19 @@
 import type { EvaluationSummary } from "../../types";
+import { useLanguage, formatScore } from "../../i18n/LanguageContext";
 
 interface EvaluationDetailProps {
   summary: EvaluationSummary;
 }
 
 export function EvaluationDetail({ summary }: EvaluationDetailProps) {
+  const { t, language } = useLanguage();
+
   return (
     <div style={{ padding: "0.75rem" }}>
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <thead>
           <tr>
-            {["Questão", "Peso", "Nota", "Contribuição"].map((h) => (
+            {[t('question'), t('weight'), t('score'), t('contribution')].map((h) => (
               <th
                 key={h}
                 style={{
@@ -65,7 +68,7 @@ export function EvaluationDetail({ summary }: EvaluationDetailProps) {
                   fontSize: "0.85rem",
                 }}
               >
-                {((q.score * q.weight) / 100).toFixed(2)}
+                {formatScore((q.score * q.weight) / 100, language)}
               </td>
             </tr>
           ))}
@@ -82,7 +85,7 @@ export function EvaluationDetail({ summary }: EvaluationDetailProps) {
                 fontSize: "0.85rem",
               }}
             >
-              Total
+              {t('total')}
             </td>
             <td
               style={{
@@ -93,7 +96,7 @@ export function EvaluationDetail({ summary }: EvaluationDetailProps) {
                 fontSize: "0.85rem",
               }}
             >
-              {summary.total_score.toFixed(2)}
+              {formatScore(summary.total_score, language)}
             </td>
           </tr>
         </tfoot>

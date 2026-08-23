@@ -41,6 +41,8 @@ When developing FastAPI applications with SQLite databases, you need a reliable 
 - WAL mode enabled for better SQLite performance
 - Comprehensive seed data including employees, relationships, and evaluation questions
 
+> **Update (2026-08-22)**: Question seeding is no longer insert-only. `seed_database()` calls `_correct_questions()`, which upserts title/weight/order by id against canonical `CASE_QUESTIONS` (from `docs/case_tecnico.txt`). Existing question rows converge to the case spec on every startup — legacy demo databases with outdated titles/weights self-heal without manual deletes.
+
 ## Planned / Optional Extensions (If Applicable)
 
 - Add environment-specific seed data
@@ -178,11 +180,14 @@ def seed_database(db: Session) -> None:
         logger.info("Seeding evaluation questions...")
         questions = [
             EvaluationQuestion(id=1, title="Entrega de Resultados", weight=25, order=1),
-            EvaluationQuestion(id=2, title="Trabalho em Equipe", weight=20, order=2),
-            # ... more questions
+            EvaluationQuestion(id=2, title="Execução e Qualidade do Trabalho", weight=20, order=2),
+            # ... more questions (canonical CASE_QUESTIONS from docs/case_tecnico.txt)
         ]
         db.add_all(questions)
         logger.info("Seeded 6 evaluation questions")
+
+    # Self-correcting: align existing question rows with CASE_QUESTIONS
+    _correct_questions(db)
 
     db.commit()
     logger.info("Seed commit completed")
@@ -191,6 +196,7 @@ def seed_database(db: Session) -> None:
 Key points:
 - Make seeding idempotent by checking existing data
 - Handle each table independently for partial recovery
+- Question rows are also self-corrected toward `CASE_QUESTIONS` on startup via `_correct_questions()` — never treat question data as insert-only
 - Use proper logging for debugging seeding issues
 - Flush before commit to catch errors early
 

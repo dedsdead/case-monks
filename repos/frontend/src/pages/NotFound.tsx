@@ -1,6 +1,9 @@
 import { Link } from "react-router-dom";
+import { useLanguage } from "../i18n/LanguageContext";
 
 export function NotFound() {
+  const { t } = useLanguage();
+
   return (
     <div
       style={{
@@ -13,7 +16,7 @@ export function NotFound() {
       }}
     >
       <h1 style={{ color: "var(--color-primary)", marginBottom: "1rem" }}>
-        Página não encontrada
+        {t('pageNotFound')}
       </h1>
       <Link
         to="/"
@@ -23,7 +26,7 @@ export function NotFound() {
           fontSize: "1.1rem",
         }}
       >
-        Voltar para o início
+        {t('backToHome')}
       </Link>
     </div>
   );

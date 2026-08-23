@@ -42,3 +42,5 @@
 - ✅ Added authentication debugging endpoints
 - ✅ Fixed cookie domain configuration
 - ✅ Database seeding and health checks implemented
+- ✅ Seed self-corrects question rows to canonical case questions on startup (2026-08-22)
+- ✅ `/api/test-cookies` gated behind `DEBUG=true`; full-site i18n + a11y hardening (2026-08-22)

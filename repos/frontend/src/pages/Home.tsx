@@ -21,7 +21,14 @@ export function Home() {
       .then(setEvaluations)
       .catch((error) => {
         if (error.name !== 'AbortError') {
-          setError(t('loadDataError'));
+          // AC-37: If error is 401 (unauthenticated), clear employee_id to show selector prompt
+          const axiosError = error as any;
+          if (axiosError.response?.status === 401) {
+            localStorage.removeItem('employee_id');
+            // Don't set error state - Layout will show selector prompt
+          } else {
+            setError(t('loadDataError'));
+          }
         }
       })
       .finally(() => {
@@ -44,7 +51,14 @@ export function Home() {
       .then(setEvaluations)
       .catch((error) => {
         if (error.name !== 'AbortError') {
-          setError(t('loadDataError'));
+          // AC-37: If error is 401 (unauthenticated), clear employee_id to show selector prompt
+          const axiosError = error as any;
+          if (axiosError.response?.status === 401) {
+            localStorage.removeItem('employee_id');
+            // Don't set error state - Layout will show selector prompt
+          } else {
+            setError(t('loadDataError'));
+          }
         }
       })
       .finally(() => {
@@ -64,16 +78,16 @@ export function Home() {
     </div>
   );
   if (evaluations.length === 0)
-    return (
-      <EmptyState message="Você não possui subordinados para avaliar." />
-    );
+    return <EmptyState message={t('noSubordinatesMessage')} />;
 
   return (
     <div style={styles.container}>
       <div style={styles.header}>
         <div>
-          <h1 className="page-title">Meus Subordinados</h1>
-          <p className="page-subtitle">{evaluations.length} funcionário(s) na sua hierarquia</p>
+          <h1 className="page-title">{t('subordinatesTitle')}</h1>
+          <p className="page-subtitle">
+            {t('subordinatesCount', { count: evaluations.length })}
+          </p>
         </div>
         <button onClick={handleRefresh} className="btn btn-secondary">
           ↻ {t('refresh')}

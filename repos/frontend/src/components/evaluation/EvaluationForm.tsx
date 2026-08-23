@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { Employee, Question } from "../../types";
-import { useLanguage } from "../../i18n/LanguageContext";
+import { useLanguage, formatScore } from "../../i18n/LanguageContext";
 import { ConfirmDialog } from "./ConfirmDialog";
 
 interface EvaluationFormProps {
@@ -18,7 +18,7 @@ export function EvaluationForm({
   isSubmitting = false,
   error,
 }: EvaluationFormProps) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [scores, setScores] = useState<Record<number, number>>({});
   const [showConfirm, setShowConfirm] = useState(false);
 
@@ -63,9 +63,10 @@ export function EvaluationForm({
 
       {error && (
         <div
+          role="alert"
           style={{
             padding: "0.75rem",
-            backgroundColor: "#c0392b",
+            backgroundColor: "var(--color-danger)",
             color: "var(--color-background)",
             borderRadius: "4px",
             marginBottom: "1rem",
@@ -80,7 +81,7 @@ export function EvaluationForm({
         {scoredCount} {t('questionsAnswered')}
         {scoredCount > 0 && (
           <span style={{ marginLeft: "1rem", color: "var(--color-primary)", fontWeight: 600 }}>
-            {t('partialScore')}: {weightedScore.toFixed(2)}
+            {t('partialScore')}: {formatScore(weightedScore, language)}
           </span>
         )}
       </div>
@@ -114,10 +115,12 @@ export function EvaluationForm({
                 value={val !== undefined ? val : ""}
                 onChange={(e) => handleScoreChange(q.id, e.target.value)}
                 aria-label={`${t('score')} ${q.title}`}
+                aria-invalid={hasError || undefined}
+                aria-describedby={hasError ? `score-error-${q.id}` : undefined}
                 style={{
                   width: "80px",
                   padding: "0.5rem",
-                  border: `1px solid ${hasError ? "#c0392b" : "var(--color-border)"}`,
+                  border: `1px solid ${hasError ? "var(--color-danger)" : "var(--color-border)"}`,
                   borderRadius: "4px",
                   backgroundColor: "var(--color-background)",
                   color: "var(--color-primary)",
@@ -125,7 +128,10 @@ export function EvaluationForm({
                 }}
               />
               {hasError && (
-                <p style={{ color: "#c0392b", fontSize: "0.8rem", marginTop: "0.25rem" }}>
+                <p
+                  id={`score-error-${q.id}`}
+                  style={{ color: "var(--color-danger)", fontSize: "0.8rem", marginTop: "0.25rem" }}
+                >
                   {t('scoreRange')}
                 </p>
               )}

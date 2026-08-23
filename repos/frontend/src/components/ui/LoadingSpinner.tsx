@@ -1,12 +1,16 @@
+import { useLanguage } from "../../i18n/LanguageContext";
+
 interface LoadingSpinnerProps {
   size?: number;
 }
 
 export function LoadingSpinner({ size = 32 }: LoadingSpinnerProps) {
+  const { t } = useLanguage();
+
   return (
     <div
       role="status"
-      aria-label="Carregando"
+      aria-label={t('loading')}
       style={{
         display: "flex",
         justifyContent: "center",

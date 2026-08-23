@@ -39,13 +39,15 @@ export function Toast({ message, type, onClose }: ToastProps) {
 
   return createPortal(
     <div
+      role="status"
+      aria-live="polite"
       style={{
         position: "fixed",
         top: "1rem",
         right: "1rem",
         padding: "1rem 1.5rem",
         borderRadius: "6px",
-        backgroundColor: type === "success" ? "var(--color-primary)" : "#c0392b",
+        backgroundColor: type === "success" ? "var(--color-primary)" : "var(--color-danger)",
         color: "var(--color-background)",
         boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
         zIndex: 2000,

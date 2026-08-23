@@ -11,7 +11,7 @@ Main backend with API and business logic.
 - ✅ Error handling robust
 - ✅ Endpoints implemented
 - ✅ Health check endpoint (`/api/health`)
-- ✅ Cookie debugging endpoint (`/api/test-cookies`)
+- ✅ Cookie debugging endpoint (`/api/test-cookies`, gated: 404 unless `settings.DEBUG=true`)
 - ✅ Input sanitization functions implemented
 - ✅ Comprehensive error handling with detailed logging
 - ✅ Request cancellation support
@@ -65,6 +65,11 @@ Main backend with API and business logic.
 - **Generalized rule**: Before `model_validate()`/`from_orm()` on any ORM object, verify every required nested field has a backing ORM relationship. Bugs like this fire only when optional data is populated (`latest_evaluation is None` masked it) — tests exercising only the empty case will not catch it.
 - **Test gap fixed**: `tests/test_subordinates_after_evaluation.py` exercises the real service + serialization path end-to-end (previous tests mocked `get_subordinate_evaluations` and always used `latest_evaluation: None`, hiding the bug)
 
+### Debug Endpoint Gating + Self-Correcting Seed (2026-08-22)
+- **Fixed**: `/api/test-cookies` echoed cookies/headers to any caller. It now returns 404 unless `settings.DEBUG=true` (`app/routers/health.py`). Covered by `tests/test_health.py`.
+- **Fixed**: Question seeding is no longer insert-only. `seed_database()` calls `_correct_questions()`, which upserts title/weight/order by id against canonical `CASE_QUESTIONS` (mirrors `docs/case_tecnico.txt`). Legacy rows with retired titles ("Trabalho em Equipe", "Comunicação", "Iniciativa e Proatividade") are corrected on startup instead of persisting.
+- **Gotcha**: Never expose endpoints that reflect request cookies/headers without a DEBUG guard — they leak credentials in any non-dev environment.
+
 ### Request Management
 - Added AbortController support for request cancellation
 - Separated complex operations into smaller, manageable steps
@@ -96,7 +101,7 @@ Main backend with API and business logic.
 
 ## Debug Endpoints
 - **Health Check:** `GET /api/health` - Returns `{"status": "ok"}`
-- **Cookie Debug:** `GET /api/test-cookies` - Returns cookies and headers for debugging
+- **Cookie Debug:** `GET /api/test-cookies` - Returns cookies and headers for debugging (**requires `DEBUG=true`; returns 404 otherwise**)
 
 ## Error Handling Patterns
 ### HTTP Status Codes
@@ -115,7 +120,8 @@ Main backend with API and business logic.
 
 ## Frontend Integration Notes
 ### i18n System
-- **All user-facing text** in evaluation components uses the i18n system
-- Translation keys are defined in `repos/frontend/src/i18n/translations.ts`
-- Components use `useLanguage()` hook to access translations
-- Support for both Portuguese (pt-BR) and English (en) languages
+- **All user-facing text across the entire app** (pages, layout, dialogs, toasts, tables) uses the i18n system — no hardcoded strings (completed 2026-08-22)
+- Translation keys are defined in `repos/frontend/src/i18n/translations.ts` (pt-BR/en parity)
+- Components use `useLanguage()` hook to access translations; `t(key, {param})` supports `{param}` interpolation
+- Locale-aware formatting helpers are exported from `repos/frontend/src/i18n/LanguageContext.tsx`: `formatScore(value, language)` and `formatDate(date, language, options?)` — Intl-based, pt-BR renders comma decimals, en renders en-US. Do not use `.toFixed(2)` or hardcoded `"pt-BR"` date formatting in components.
+- `document.documentElement.lang` is synced on language change; support for both Portuguese (pt-BR) and English (en) languages

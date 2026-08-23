@@ -1006,7 +1006,7 @@ All UI components must use these colors consistently via CSS custom properties:
 - [ ] T019 Initialize Alembic with SQLite config
 - [ ] T020 Generate initial migration
 - [ ] T021 Run migration locally (atomic chain)
-- [ ] T022 Create seed.py service
+- [x] T022 Create seed.py service *(2026-08-22: CASE_QUESTIONS corrected to exact case spec titles/weights 25/20/20/15/10/10 with self-correcting startup pass `_correct_questions()`; see Execution Log)*
 - [ ] T023 Create week.py utility
 
 ### Phase 3: Backend API
@@ -1208,3 +1208,35 @@ All UI components must use these colors consistently via CSS custom properties:
 - `repos/frontend/src/pages/History.tsx` — Separated employee fetch from history fetch with error handling
 - `repos/frontend/src/pages/Evaluate.tsx` — Enhanced error handling with specific error types and messages
 - `repos/backend/app/main.py` — Verified CORS configuration with proper origins and headers
+
+### 2026-08-22 — Post-Plan Hardening Pass: Seed Correction, Debug Endpoint Gating, Full i18n, A11y, Dead Code Removal, README Rewrite
+
+**Scope:** Post-plan follow-up work outside the original phases (all phases already ✅ Completed). Corrected seeded evaluation questions to the exact case spec, hardened the cookie debug endpoint, completed site-wide internationalization (pt-BR/en), improved accessibility, removed dead code, and rewrote the root README.md as the case deliverable.
+
+**Tasks completed (fully):**
+- T022 (seed.py service) — `CASE_QUESTIONS` now matches the exact case spec: titles + weights 25/20/20/15/10/10 (satisfies AC-11). Added self-correcting startup pass `_correct_questions()` that aligns existing DB rows with `CASE_QUESTIONS` on every startup; covered by new `repos/backend/tests/test_seed.py`.
+- T055 (README.md) — root README fully rewritten as case deliverable: setup instructions, ASCII architecture diagram, identity switching mechanism (cookie/localStorage), API summary, business rules, interpretation of "maior hierarquia", seed notes. (Checklist item was already checked; content replaced.)
+- T057 (final cleanup) — dead code removed: deleted unused `repos/frontend/src/components/layout/Layout.tsx` and its test.
+
+**Unplanned changes (post-plan additions, not covered by any task):**
+- `/api/test-cookies` gated behind `DEBUG=true` (returns 404 otherwise) in `repos/backend/app/routers/health.py`; tests added in `repos/backend/tests/test_health.py`. The endpoint echoes cookies and was previously always enabled.
+- Full-site i18n: ~30 new translation keys with pt-BR/en parity (`src/i18n/translations.ts`); `{param}` interpolation added to `LanguageContext.t()`; `document.documentElement.lang` synced on language change; `Intl`-based `formatScore`/`formatDate` helpers (comma vs dot decimal separators per locale); `index.html` set to `lang="pt-BR"` with real page title.
+- Accessibility: ConfirmDialog given dialog semantics + focus trap + Escape-to-close; Toast uses `aria-live`; `aria-pressed` on language switcher; aria-labels on icon buttons; table overflow wrappers; `aria-invalid`/`aria-describedby` on score inputs. CSS tokens `--color-danger*`/`--color-success` added to `index.css` (success tokens were referenced by components but previously undefined).
+- Tests updated across affected components.
+
+**Implementation deviations / decisions:**
+- "Maior hierarquia" (RN-12): interpretation documented in README rather than implemented as a behavior change — consistent with the plan's prior decision to defer RN-12 to a future enhancement (Clarifications → Resolved via Clarification Post-Review #2).
+- Seed correction implemented as a self-correcting startup pass instead of a one-off migration/script, so existing databases converge to the case spec without manual intervention.
+- Debug endpoint hardened (DEBUG-gated 404) rather than removed — preserves the troubleshooting tool from the 2026-08-19 infrastructure session while closing the information-disclosure risk.
+
+**Verification:** backend pytest 116 passed; frontend vitest 91 passed (20 files); `tsc -b && vite build` clean; oxlint informational-only.
+
+**Files changed:**
+- `repos/backend/app/services/seed.py`, `repos/backend/tests/test_seed.py` — CASE_QUESTIONS + `_correct_questions()`
+- `repos/backend/app/routers/health.py`, `repos/backend/tests/test_health.py` (new) — DEBUG-gated `/api/test-cookies`
+- `repos/frontend/src/i18n/translations.ts`, `repos/frontend/src/i18n/LanguageContext.tsx`, `repos/frontend/src/components/layout/LanguageSwitcher.tsx` — i18n keys, interpolation, lang sync
+- `repos/frontend/index.html`, `repos/frontend/src/index.css` — lang/title, danger/success tokens
+- `repos/frontend/src/components/ui/{Toast,LoadingSpinner,ErrorBoundary}.tsx`, `repos/frontend/src/components/evaluation/{ConfirmDialog,EvaluationForm}.tsx` (+tests), `repos/frontend/src/components/history/{EvaluationHistory,EvaluationDetail}.tsx` (+tests), `repos/frontend/src/components/employee/EmployeeList.tsx` (+test), `repos/frontend/src/components/layout/{LeaderSelector,LayoutWithSidebar}.tsx` (+LeaderSelector test) — a11y + i18n wiring
+- `repos/frontend/src/pages/{Home,Evaluate,History,GlobalHistory,NotFound}.tsx` (+tests), `repos/frontend/tests/evaluation-history.test.tsx` — i18n/a11y updates
+- `repos/frontend/src/components/layout/Layout.tsx`, `Layout.test.tsx` — deleted (dead code)
+- `README.md` — rewritten as case deliverable
