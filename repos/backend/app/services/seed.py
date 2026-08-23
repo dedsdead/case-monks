@@ -9,12 +9,57 @@ from app.models.evaluation_question import EvaluationQuestion
 
 logger = logging.getLogger(__name__)
 
+# Canonical questions/weights required by docs/case_tecnico.txt.
+# Single source of truth for both fresh inserts and correction of existing rows.
+CASE_QUESTIONS = [
+    {"id": 1, "title": "Entrega de Resultados", "weight": 25, "order": 1},
+    {"id": 2, "title": "Execução e Qualidade do Trabalho", "weight": 20, "order": 2},
+    {"id": 3, "title": "Capacidade de Aprendizado e Desenvolvimento", "weight": 20, "order": 3},
+    {"id": 4, "title": "Resolução de Problemas e Pensamento Crítico", "weight": 15, "order": 4},
+    {"id": 5, "title": "Colaboração, Influência e Liderança", "weight": 10, "order": 5},
+    {"id": 6, "title": "Visão Estratégica e Potencial de Crescimento", "weight": 10, "order": 6},
+]
+
+
+def _correct_questions(db: Session) -> None:
+    """Align existing question rows with CASE_QUESTIONS (self-correcting seed).
+
+    Older databases may contain outdated titles/weights; this updates them on
+    startup so demo databases converge to the case spec without manual deletes.
+    """
+    corrected = 0
+    for spec in CASE_QUESTIONS:
+        question = db.query(EvaluationQuestion).filter_by(id=spec["id"]).first()
+        if question is None:
+            continue
+        changes = {}
+        if question.title != spec["title"]:
+            changes["title"] = spec["title"]
+        if int(question.weight) != spec["weight"]:
+            changes["weight"] = spec["weight"]
+        if question.order != spec["order"]:
+            changes["order"] = spec["order"]
+        if changes:
+            for field, value in changes.items():
+                setattr(question, field, value)
+            corrected += 1
+            logger.warning(
+                "Corrected evaluation_question id=%s: %s",
+                spec["id"],
+                ", ".join(f"{k}->{v}" for k, v in changes.items()),
+            )
+    if corrected:
+        db.flush()
+        logger.info("Corrected %d evaluation question(s)", corrected)
+
 
 def seed_database(db: Session) -> None:
     """Populate database with seed data (idempotent).
 
     Inserts 20 employees, 19 leader_lead relationships, and 6 evaluation questions.
     Checks each table independently to handle partial-seed recovery.
+    Evaluation questions are also self-correcting: existing rows that deviate
+    from CASE_QUESTIONS (titles/weights per the case spec) are updated on startup.
     """
     # Check and insert employees
     if db.query(Employee).first() is None:
@@ -73,19 +118,17 @@ def seed_database(db: Session) -> None:
         db.flush()
         logger.info("Seeded 19 leader_lead relationships")
 
-    # Check and insert evaluation questions
+    # Check and insert evaluation questions (then correct any drift)
     if db.query(EvaluationQuestion).first() is None:
         logger.info("Seeding evaluation questions...")
         questions = [
-            EvaluationQuestion(id=1, title="Entrega de Resultados", weight=25, order=1),
-            EvaluationQuestion(id=2, title="Trabalho em Equipe", weight=20, order=2),
-            EvaluationQuestion(id=3, title="Comunicação", weight=15, order=3),
-            EvaluationQuestion(id=4, title="Iniciativa e Proatividade", weight=15, order=4),
-            EvaluationQuestion(id=5, title="Resolução de Problemas", weight=15, order=5),
-            EvaluationQuestion(id=6, title="Liderança e Influência", weight=10, order=6),
+            EvaluationQuestion(id=q["id"], title=q["title"], weight=q["weight"], order=q["order"])
+            for q in CASE_QUESTIONS
         ]
         db.add_all(questions)
         logger.info("Seeded 6 evaluation questions")
+
+    _correct_questions(db)
 
     db.commit()
     logger.info("Seed commit completed")
